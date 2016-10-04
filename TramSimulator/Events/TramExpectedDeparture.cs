@@ -29,19 +29,16 @@ namespace TramSimulator.Events
             //Find the next tram
             int? id = simState.Routes.NextTram(tram.TramId, _depStation);
             double currTime = StartTime;
+            double timeFromCentral = simState.TimeTables[_tramId].halfTime;
+            string central = simState.Routes.CentralToPR[0].From;
+            double timeFromPR = simState.TimeTables[_tramId].startTime;
+            string pr = simState.Routes.PRToCentral[0].From;
 
-
-            if (_depStation == simState.Routes.PRToCentral[0].From && currTime < simState.TimeTables[_tramId].startTime)
-            {
-                eventQueue.AddEvent(new TramExpectedDeparture(_tramId, simState.TimeTables[_tramId].startTime, _depStation));
-
-            }
-
-            else if (_depStation == simState.Routes.CentralToPR[0].From && currTime < simState.TimeTables[_tramId].halfTime)
-            {
-                eventQueue.AddEvent(new TramExpectedDeparture(_tramId, simState.TimeTables[_tramId].halfTime, _depStation));
-            }
-        
+            if (_depStation == central && StartTime >= timeFromCentral)
+                eventQueue.AddEvent(new TramExpectedDeparture(_tramId, timeFromCentral, _depStation));
+            //  Op PR wachten op time table
+            else if (_depStation == pr && StartTime >= timeFromPR)
+                eventQueue.AddEvent(new TramExpectedDeparture(_tramId, timeFromPR, _depStation));
             else if (id.HasValue) //If there exists a tram on the same track
             {
                 Tram nextTram = simState.Trams[id.Value];
@@ -76,6 +73,7 @@ namespace TramSimulator.Events
             eventQueue.AddEvent(new TramExpectedArrival(_tramId, arrRate, nextStation));
             simState.Routes.MoveToNextTrack(_tramId, _depStation);
 
+            simState.TimeTables[_tramId].addTime(simState.Routes.GetTrack(_tramId), StartTime);
             //if there was a tram waiting create an arrival event
             if (station.WaitingTrams.Count > 0)
             {
