@@ -29,8 +29,8 @@ namespace TramSimulator
 
             //We probably want a different method of input for the file paths
             //Console.WriteLine("Enter a file path");
-            String patha = "F:\\Users\\Rogier\\Desktop\\12a.csv";
-            String pathb = "F:\\Users\\Rogier\\Desktop\\12b.csv";
+            String patha = "C:\\Users\\Rogier\\Desktop\\12a.csv";
+            String pathb = "C:\\Users\\Rogier\\Desktop\\12b.csv";
 
             Stream streama = File.Open(patha, FileMode.Open);
             Stream streamb = File.Open(pathb, FileMode.Open);
@@ -45,13 +45,27 @@ namespace TramSimulator
             threadA.Join();
             threadB.Join();
 
-            Data a = new Data();
+            Dictionary<string, double> totalPrognose = new Dictionary<string, double>();
+            totalPrognose["PR"] = 15;
+            totalPrognose["WKZ"] = 1015;
+            totalPrognose["UMC"] = 2660;
+            totalPrognose["Heidelberglaan"] = 9138;
+            totalPrognose["Padualaan"] = 6855;
+            totalPrognose["Kromme Rijn"] = 691;
+            totalPrognose["Galgenwaard"] = 606;
+            totalPrognose["Vaartscherijn"] = 1261;
+            totalPrognose["CS"] = 0;
+            Data a = new Data(totalPrognose);
             foreach (PassengerCount pc in passengerCountsA)
                 a.AddPC(pc);
-            Console.WriteLine( a.EnteringFQ(DayOfWeek.Monday, "Heidelberglaan", 9 * 60 * 60));
-            Console.WriteLine(a.EnteringFQ(DayOfWeek.Monday, "Heidelberglaan", 14 * 60 * 60));
-            Console.WriteLine(a.EnteringFQ(DayOfWeek.Tuesday, "Heidelberglaan", 14 * 60 * 60));
-            Console.WriteLine(a.EnteringFQ(DayOfWeek.Monday, "Rubenslaan", 12 * 60 * 60));
+            double total = 0;
+            for (int i = 0; i < 96; i++)
+            {
+                double j = a.EnteringFQ(DayOfWeek.Monday, "Heidelberglaan", i * 15 * 60);
+                Console.WriteLine("{0}:{1} = {2}", i / 4, i % 4 * 15, j);
+                total += j;
+            }
+            Console.WriteLine("total{0}", total);
             //Some example output
             //Console.WriteLine("Number of passengercounts: " + passengerCountsA.Count);
             //Console.WriteLine(passengerCountsA[0].Trip);
