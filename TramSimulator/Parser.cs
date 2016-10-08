@@ -18,7 +18,7 @@ namespace TramSimulator
             using (StreamReader sr = new StreamReader(s))
             {
                 String line;
-                sr.ReadLine(); //throw away Top column
+                //sr.ReadLine(); //throw away Top column
                 List<string> stations = parseStations(sr.ReadLine()); //parse column line
                 while((line = sr.ReadLine()) != null)
                 {
@@ -28,8 +28,8 @@ namespace TramSimulator
                     DateTime date = DateTime.Parse(values[1],new CultureInfo("nl-NL")); //Parse as dd-MM-yyyy
                     DateTime time = DateTime.Parse(values[2], new CultureInfo("nl-NL")); //Parse as HH:mm
 
-                    List<int> enteringNumbers = values.Skip(3).Take(9).Select(x => Int32.Parse(x)).ToList();
-                    List<int> departingNumbers = values.Skip(12).Select(x => Int32.Parse(x)).ToList();
+                    List<int> enteringNumbers = values.Skip(3).Take(7).Select(x => Int32.Parse(x)).ToList();
+                    List<int> departingNumbers = values.Skip(10).Select(x => Int32.Parse(x)).ToList();
 
                     //Constructs dictionaries using stations as keys and the passengers leaving and 
                     //entering as values

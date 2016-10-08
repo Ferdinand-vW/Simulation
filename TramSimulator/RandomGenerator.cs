@@ -28,6 +28,7 @@ namespace TramSimulator
         //Called with Generate.negexp(u)
         static public double negexp(double u)
         {
+            //double lambda = (double)1 / u;
             return Math.Log(1 - Instance.random.NextDouble()) / (-u);
         }
         //Called with Generate.uniform(low,high)

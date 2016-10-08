@@ -34,10 +34,10 @@ namespace TramSimulator.Events
             double timeFromPR = simState.TimeTables[_tramId].startTime;
             string pr = simState.Routes.PRToCentral[0].From;
 
-            if (_depStation == central && StartTime >= timeFromCentral)
+            if (_depStation == central && StartTime < timeFromCentral)
                 eventQueue.AddEvent(new TramExpectedDeparture(_tramId, timeFromCentral, _depStation));
             //  Op PR wachten op time table
-            else if (_depStation == pr && StartTime >= timeFromPR)
+            else if (_depStation == pr && StartTime < timeFromPR)
                 eventQueue.AddEvent(new TramExpectedDeparture(_tramId, timeFromPR, _depStation));
             else if (id.HasValue) //If there exists a tram on the same track
             {
@@ -50,7 +50,7 @@ namespace TramSimulator.Events
                 else //Tram was not able to depart and has to schedule new departure
                 {
                     double timeDiff = currTime + (40 - currTime - nextTram.DepartureTime);
-                    eventQueue.AddEvent(new TramExpectedDeparture(_tramId, timeDiff, _depStation));
+                    eventQueue.AddEvent(new TramExpectedDeparture(_tramId, StartTime + timeDiff, _depStation));
                 }
             }
             else
@@ -65,20 +65,20 @@ namespace TramSimulator.Events
             var tram = simState.Trams[_tramId];
             var station = simState.Stations[_depStation];
             var nextStation = simState.Routes.NextStation(_tramId, _depStation);
-            var arrRate = simState.Rates.TramArrivalRate(_depStation, nextStation);
+            var arrTime = StartTime + simState.Rates.TramArrivalRate(_depStation, nextStation);
 
             //Handle departure of a tram
             tram.State = Tram.TramState.OnTrack;
             station.TramIsStationed = false;
-            eventQueue.AddEvent(new TramExpectedArrival(_tramId, arrRate, nextStation));
+            eventQueue.AddEvent(new TramExpectedArrival(_tramId, arrTime, nextStation));
             simState.Routes.MoveToNextTrack(_tramId, _depStation);
 
             simState.TimeTables[_tramId].addTime(simState.Routes.GetTrack(_tramId), StartTime);
             //if there was a tram waiting create an arrival event
             if (station.WaitingTrams.Count > 0)
             {
-                var wTramId = station.WaitingPersons.Dequeue();
-                eventQueue.AddEvent(new TramExpectedArrival(_tramId, 0, _depStation));
+                var wTramId = station.WaitingTrams.Dequeue();
+                eventQueue.AddEvent(new TramExpectedArrival(wTramId,StartTime, _depStation));
             }
         }
 

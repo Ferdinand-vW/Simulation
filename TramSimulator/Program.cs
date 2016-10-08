@@ -19,18 +19,9 @@ namespace TramSimulator
 
 
         {
-            if (false)
-            {
-                Simulation sim = new Simulation(null);
-                sim.run(2, null, "monday", new string[] { "Central", "AZR", "PR" });
-                return;
-            }
 
-
-            //We probably want a different method of input for the file paths
-            //Console.WriteLine("Enter a file path");
-            String patha = "C:\\Users\\Rogier\\Desktop\\12a.csv";
-            String pathb = "C:\\Users\\Rogier\\Desktop\\12b.csv";
+            String patha = @"C:\Users\Rogier\Documents\Master\alg\Simulation\a_data_updated.csv";
+            String pathb = @"C:\Users\Rogier\Documents\Master\alg\Simulation\b_data_updated.csv";
 
             Stream streama = File.Open(patha, FileMode.Open);
             Stream streamb = File.Open(pathb, FileMode.Open);
@@ -45,27 +36,63 @@ namespace TramSimulator
             threadA.Join();
             threadB.Join();
 
-            Dictionary<string, double> totalPrognose = new Dictionary<string, double>();
-            totalPrognose["PR"] = 15;
-            totalPrognose["WKZ"] = 1015;
-            totalPrognose["UMC"] = 2660;
-            totalPrognose["Heidelberglaan"] = 9138;
-            totalPrognose["Padualaan"] = 6855;
-            totalPrognose["Kromme Rijn"] = 691;
-            totalPrognose["Galgenwaard"] = 606;
-            totalPrognose["Vaartscherijn"] = 1261;
-            totalPrognose["CS"] = 0;
-            Data a = new Data(totalPrognose);
+            Dictionary<string, double> enterPrognoseA = new Dictionary<string, double>();
+            Dictionary<string, double> enterPrognoseB = new Dictionary<string, double>();
+            Dictionary<string, double> exitPrognoseA = new Dictionary<string, double>();
+            Dictionary<string, double> exitPrognoseB = new Dictionary<string, double>();
+            enterPrognoseA["PR"] = 15;
+            enterPrognoseA["WKZ"] = 1015;
+            enterPrognoseA["UMC"] = 2660;
+            enterPrognoseA["Heidelberglaan"] = 9138;
+            enterPrognoseA["Padualaan"] = 6855;
+            enterPrognoseA["Kromme Rijn"] = 691;
+            enterPrognoseA["Galgenwaard"] = 606;
+            enterPrognoseA["Vaartscherijn"] = 1261;
+            enterPrognoseA["CS"] = 0;
+
+
+            exitPrognoseA["PR"] = 0;
+            exitPrognoseA["WKZ"] = 0;
+            exitPrognoseA["UMC"] = 0;
+            exitPrognoseA["Heidelberglaan"] = 0;
+            exitPrognoseA["Padualaan"] = 236 / 12827;
+            exitPrognoseA["Kromme Rijn"] = 31 / 19446;
+            exitPrognoseA["Galgenwaard"] = 265 / 20106;
+            exitPrognoseA["Vaartscherijn"] = 544 / 20447;
+            exitPrognoseA["CS"] = 21164 / 21164;
+
+            enterPrognoseB["CS"] = 19994;
+            enterPrognoseB["Vaartscherijn"] = 2337;
+            enterPrognoseB["Galgenwaard"] = 359;
+            enterPrognoseB["Kromme Rijn"] = 47;
+            enterPrognoseB["Padualaan"] = 10;
+            enterPrognoseB["Heidelberglaan"] = 8;
+            enterPrognoseB["UMC"] = 6;
+            enterPrognoseB["WKZ"] = 0;
+            enterPrognoseB["PR"] = 0;
+
+            exitPrognoseB["CS"] = 0;
+            exitPrognoseB["Vaartscherijn"] = 1735 / 19994;
+            exitPrognoseB["Galgenwaard"] = 1288 / 20596;
+            exitPrognoseB["Kromme Rijn"] = 1039 / 19667;
+            exitPrognoseB["Padualaan"] = 9672 / 18674;
+            exitPrognoseB["Heidelberglaan"] = 5789 / 9011;
+            exitPrognoseB["UMC"] = 2577 / 3230;
+            exitPrognoseB["WKZ"] = 644 / 659;
+            exitPrognoseB["PR"] = 1;
+
+
+            Data a = new Data(enterPrognoseA, exitPrognoseA);
+            Data b = new Data(enterPrognoseB, exitPrognoseB);
             foreach (PassengerCount pc in passengerCountsA)
                 a.AddPC(pc);
-            double total = 0;
-            for (int i = 0; i < 96; i++)
-            {
-                double j = a.EnteringFQ(DayOfWeek.Monday, "Heidelberglaan", i * 15 * 60);
-                Console.WriteLine("{0}:{1} = {2}", i / 4, i % 4 * 15, j);
-                total += j;
-            }
-            Console.WriteLine("total{0}", total);
+            foreach (PassengerCount pc in passengerCountsB)
+                b.AddPC(pc);
+
+
+            Simulation sim = new Simulation(a,b);
+            sim.run(2, null, DayOfWeek.Monday, new string[] { "PR", "WKZ", "UMC", "Heidelberglaan", "Padualaan", "Kromme Rijn", "Galgenwaard", "Vaartscherijn", "CS" });
+            return;
             //Some example output
             //Console.WriteLine("Number of passengercounts: " + passengerCountsA.Count);
             //Console.WriteLine(passengerCountsA[0].Trip);
@@ -81,5 +108,7 @@ namespace TramSimulator
             //}
             Console.ReadLine();
         }
+
+
     }
 }

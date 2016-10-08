@@ -34,13 +34,22 @@ namespace TramSimulator.Events
                 tram.State = Tram.TramState.AtStation;
                 tram.Station = _arrStation;
                 string pr = simState.Routes.CentralToPR[0].To;
-
+                string cs = simState.Routes.PRToCentral[0].To;
+                double newTime = StartTime + 10;
                 if (_arrStation == pr)
-                    simState.TimeTables[_tramId].renewTimeTable(simState.Rates,simState.Routes, simState.TimeTables[_tramId].totalTime);
+                {
+                    simState.TimeTables[_tramId].renewTimeTable(simState.Rates, simState.Routes, simState.TimeTables[_tramId].totalTime);
+                    newTime += 180;
+                    //omdraaien
+                }
+                else if (_arrStation == cs){
+                    //omdraaien
+                    newTime += 180;
+                }
+                //var emptyRate = simState.Rates.TramEmptyRate(_arrStation);
+                //var fillRate = simState.Rates.TramFillRate(_arrStation);
 
-                var emptyRate = simState.Rates.TramEmptyRate(_arrStation);
-                var fillRate = simState.Rates.TramFillRate(_arrStation);
-                Event e = new TramExpectedDeparture(_tramId, emptyRate + fillRate, _arrStation);
+                Event e = new TramExpectedDeparture(_tramId,newTime, _arrStation);
                 simState.EventQueue.AddEvent(e);
             }
         }

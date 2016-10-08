@@ -60,7 +60,8 @@ namespace TramSimulator.States
 
         private Track GetNextTrack(string depStation, string prevStation)
         {
-            return CentralToPR.Union(PRToCentral).First(x => x.From == depStation && x.To != prevStation);
+
+            return CentralToPR.Union(PRToCentral).First(x => x.From == depStation && x.To != prevStation || (depStation == "CS" && x.From == "CS") || (depStation == "PR" && x.From == "PR"));
         }
     }
 
