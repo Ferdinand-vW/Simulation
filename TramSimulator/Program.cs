@@ -20,8 +20,8 @@ namespace TramSimulator
 
         {
 
-            String patha = @"C:\Users\Rogier\Documents\Master\alg\Simulation\a_data_updated.csv";
-            String pathb = @"C:\Users\Rogier\Documents\Master\alg\Simulation\b_data_updated.csv";
+            String patha = @"F:\Users\Rogier\Source\Repos\Simulation2\a_data_updated.csv";
+            String pathb = @"F:\Users\Rogier\Source\Repos\Simulation2\b_data_updated.csv";
 
             Stream streama = File.Open(patha, FileMode.Open);
             Stream streamb = File.Open(pathb, FileMode.Open);
@@ -59,7 +59,7 @@ namespace TramSimulator
             exitPrognoseA["Kromme Rijn"] = 31 / 19446;
             exitPrognoseA["Galgenwaard"] = 265 / 20106;
             exitPrognoseA["Vaartscherijn"] = 544 / 20447;
-            exitPrognoseA["CS"] = 21164 / 21164;
+            exitPrognoseA["CS"] = 1;
 
             enterPrognoseB["CS"] = 19994;
             enterPrognoseB["Vaartscherijn"] = 2337;
@@ -90,8 +90,19 @@ namespace TramSimulator
                 b.AddPC(pc);
 
 
+            // SimulationRates rates = new SimulationRates(a, b, DayOfWeek.Monday);
+            //for (int i = 60 * 60 * 6; i < 21 * 60 * 60; i = i + 15 * 60)
+            //{
+            //   if (rates.nonZeroPercentage("Heidelberglaan", true, i))
+            //  {
+            //       double dist = rates.PersonArrivalRate("Heidelberglaan", true, i);
+            //       Console.WriteLine(dist);
+            //   }
+            // }
+            //Console.ReadLine();
+            //return;
             Simulation sim = new Simulation(a,b);
-            sim.run(2, null, DayOfWeek.Monday, new string[] { "PR", "WKZ", "UMC", "Heidelberglaan", "Padualaan", "Kromme Rijn", "Galgenwaard", "Vaartscherijn", "CS" });
+            sim.run(10, null, DayOfWeek.Monday, new string[] { "PR", "WKZ", "UMC", "Heidelberglaan", "Padualaan", "Kromme Rijn", "Galgenwaard", "Vaartscherijn", "CS" });
             return;
             //Some example output
             //Console.WriteLine("Number of passengercounts: " + passengerCountsA.Count);

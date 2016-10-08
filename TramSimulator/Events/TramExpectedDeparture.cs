@@ -67,17 +67,23 @@ namespace TramSimulator.Events
             var nextStation = simState.Routes.NextStation(_tramId, _depStation);
             var arrTime = StartTime + simState.Rates.TramArrivalRate(_depStation, nextStation);
 
+            bool onA = simState.Routes.OnA(_tramId);
             //Handle departure of a tram
             tram.State = Tram.TramState.OnTrack;
-            station.TramIsStationed = false;
+
+            if (onA) station.TramIsStationedA = false; 
+            else station.TramIsStationedB = false; 
+
             eventQueue.AddEvent(new TramExpectedArrival(_tramId, arrTime, nextStation));
             simState.Routes.MoveToNextTrack(_tramId, _depStation);
 
             simState.TimeTables[_tramId].addTime(simState.Routes.GetTrack(_tramId), StartTime);
             //if there was a tram waiting create an arrival event
-            if (station.WaitingTrams.Count > 0)
+            if (station.WaitingTrams(onA,_tramId))
             {
-                var wTramId = station.WaitingTrams.Dequeue();
+                int wTramId;
+                if (onA) wTramId = station.WaitingTramsA.Dequeue();
+                else wTramId = station.WaitingTramsB.Dequeue();
                 eventQueue.AddEvent(new TramExpectedArrival(wTramId,StartTime, _depStation));
             }
         }

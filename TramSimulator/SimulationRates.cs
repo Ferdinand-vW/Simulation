@@ -25,12 +25,15 @@ namespace TramSimulator
             else
                 avgPersonPer15Min = b.EnteringFQ(day, station, time);
             double avgPersonPerSec = avgPersonPer15Min / (double)(60 * 15);
-            double distNextEvent = Generate.negexp(avgPersonPerSec);
+            double enteringPercentage = typeA ? a.EnteringFQ(day, station, time) : b.EnteringFQ(day, station, time);
 
+            double distNextEvent = Generate.negexp(avgPersonPerSec);
             return distNextEvent;
         }
-        public bool nonZeroPercentage(double time, string station, bool typeA) {
-            return typeA ? 0 == a.EnteringFQ(day, station, time) : 0 == b.EnteringFQ(day, station, time);
+        public bool nonZeroPercentage(string station, bool typeA, double time)
+        {
+            double enteringPercentage = typeA ? a.EnteringFQ(day, station, time) : b.EnteringFQ(day, station, time);
+            return enteringPercentage != 0 ;
         }
 
         public double TramArrivalRate(string depStation, string arrStation)
@@ -72,7 +75,8 @@ namespace TramSimulator
                 return 243;
             else if (depStation == "Vaartscherijn" && arrStation == "CS")
                 return 135;
-            return Double.MaxValue;
+            else
+                 throw new Exception("Station "+ depStation + " and "+ arrStation + " does not exist");
         }
 
         public double DelayRate(string station)

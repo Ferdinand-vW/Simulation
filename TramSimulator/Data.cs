@@ -63,7 +63,7 @@ namespace TramSimulator
                 int min = (int)time / 60;
                 min = min - (min % 15);
                 double fq = blocks.ContainsKey(min) ? blocks[min].EnteringFQ(busStop) : 0;
-                return fq /totals[busStop];
+                return totals[busStop]!=0?fq /totals[busStop]:0;
             }
 
             public void AddPC(PassengerCount pc)
@@ -102,7 +102,6 @@ namespace TramSimulator
                 }
                 public double EnteringFQ(string busStop)
                 {
-                    //niet correct
                     double feq = 0;
                     foreach (PassengerCount pc in PCs)
                         feq += pc.EnteringCounts[busStop];

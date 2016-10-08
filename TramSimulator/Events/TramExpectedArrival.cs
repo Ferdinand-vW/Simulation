@@ -24,13 +24,16 @@ namespace TramSimulator.Events
             var station = simState.Stations[_arrStation];
             var tram = simState.Trams[_tramId];
             //Tram has to wait until station is empty
-            if (station.WaitingTrams.Count > 0 || station.TramIsStationed)
+            bool onA = simState.Routes.OnA(_tramId);
+            if ( station.TramIsStationed(onA))
             {
-                station.WaitingTrams.Enqueue(_tramId);
+                if(onA) station.WaitingTramsA.Enqueue(_tramId);
+                else station.WaitingTramsB.Enqueue(_tramId);
             }
             else
             {
-                station.TramIsStationed = true;
+                if (onA) station.TramIsStationedA = true;
+                else station.TramIsStationedB = true;
                 tram.State = Tram.TramState.AtStation;
                 tram.Station = _arrStation;
                 string pr = simState.Routes.CentralToPR[0].To;
