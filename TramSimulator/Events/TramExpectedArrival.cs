@@ -70,7 +70,15 @@ namespace TramSimulator.Events
             var tram = simState.Trams[_tramId];
             var station = simState.Stations[_arrStation];
             bool typeA = simState.Routes.OnA(_tramId);
-            Queue<Person> waitingPersons = simState.Routes.OnA(_tramId) ? station.WaitingPersonsA : station.WaitingPersonsB;
+            Queue<Person> waitingPersons;
+
+            // uitladen bij de ene kant en inladen bij de andere kant
+            if (_arrStation == "CS")
+                waitingPersons = station.WaitingPersonsB;
+            else if (_arrStation == "PR")
+                waitingPersons = station.WaitingPersonsA;
+            else
+                waitingPersons = simState.Routes.OnA(_tramId) ? station.WaitingPersonsA : station.WaitingPersonsB;
 
             int countExit = tram.EmptyTram(simState.Rates.TramEmptyRate(_arrStation,typeA));
             int countEnter = tram.FillTram(waitingPersons);
