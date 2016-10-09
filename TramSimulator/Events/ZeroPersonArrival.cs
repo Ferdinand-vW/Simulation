@@ -23,8 +23,6 @@ namespace TramSimulator.Events
             if (simState.Rates.nonZeroPercentage( _stationName, typeA, StartTime))
             {
                 double newTime = StartTime + simState.Rates.PersonArrivalRate(_stationName, typeA, StartTime);
-                Console.WriteLine();
-                Console.WriteLine("##############newTime = {0}", newTime);
                 simState.EventQueue.AddEvent(new PersonArrival(newTime, _stationName, typeA));
             }
             else

@@ -28,41 +28,30 @@ namespace TramSimulator.States
             PersonsOnTram = new List<Person>();
 
         }
-        public void EmptyTram(double emptyRate)
+        public int EmptyTram(double emptyRate)
         {
-            int i = (int)(PersonsOnTram.Count * emptyRate);
-            for (int j = 0; j < i; j++)
+            int n = 0;
+            for (int i = 0; i < PersonsOnTram.Count; i++)
             {
-                PersonsOnTram.RemoveAt((int)Generate.uniform(0, PersonsOnTram.Count - 1));
+                if (Generate.uniform(0, 1) < emptyRate)
+                {
+                    n++;
+                    Person p = PersonsOnTram[i]; // kunnen nog wat met persoon doen eventueel
+                    PersonsOnTram.RemoveAt(i);
+                }
             }
+            return n;
         }
-        public void FillTram(List<Person> waitingPersons)
+        public int FillTram(Queue<Person> waitingPersons)
         {
+            int n = 0;
             while (PersonsOnTram.Count < capacity && waitingPersons.Count > 0)
             {
-                Person p = waitingPersons[0];
-                waitingPersons.RemoveAt(0);
+                n++;
+                Person p = waitingPersons.Dequeue();
                 PersonsOnTram.Add(p);
             }
-
-        }
-
-        //Waar hebben we deze methoden voor nodig?
-        public Tram NextTram()
-        {
-            //if (0 == index)
-               // return trams[trams.Length - 1];
-           // else
-               // return trams[index - 1];
-            return null;
-        }
-        public Tram PreviousTram()
-        {
-            //if (trams.Length - 1 == index)
-              //  return trams[0];
-           // else
-                //return trams[index + 1];
-            return null;
+            return n;
         }
     }
 }

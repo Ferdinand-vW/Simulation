@@ -102,7 +102,7 @@ namespace TramSimulator
             //Console.ReadLine();
             //return;
             Simulation sim = new Simulation(a,b);
-            sim.run(10, null, DayOfWeek.Monday, new string[] { "PR", "WKZ", "UMC", "Heidelberglaan", "Padualaan", "Kromme Rijn", "Galgenwaard", "Vaartscherijn", "CS" });
+            sim.run(8, null, DayOfWeek.Monday, new string[] { "PR", "WKZ", "UMC", "Heidelberglaan", "Padualaan", "Kromme Rijn", "Galgenwaard", "Vaartscherijn", "CS" });
             return;
             //Some example output
             //Console.WriteLine("Number of passengercounts: " + passengerCountsA.Count);

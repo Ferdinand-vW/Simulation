@@ -79,21 +79,15 @@ namespace TramSimulator
                  throw new Exception("Station "+ depStation + " and "+ arrStation + " does not exist");
         }
 
-        public double DelayRate(string station)
+        public double DelayRate(int enter, int exit)
         {
-            throw new NotImplementedException();
+            return 12.5 + 0.22 * enter + 0.13 * exit;
         }
 
-        public double TramEmptyRate(string station)
+        public double TramEmptyRate(string station, bool typeA)
         {
-            throw new NotImplementedException();
+            return typeA ?a.departPercentage(station) : b.departPercentage(station);
+
         }
-
-        public double TramFillRate(string station)
-        {
-            throw new NotImplementedException();
-        }
-
-
     }
 }
