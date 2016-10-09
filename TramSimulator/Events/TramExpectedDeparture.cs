@@ -72,8 +72,6 @@ namespace TramSimulator.Events
             eventQueue.AddEvent(new TramExpectedArrival(_tramId, arrTime, nextStation));
             simState.Routes.MoveToNextTrack(_tramId, _depStation);
 
-            simState.TimeTables[_tramId].addTime(simState.Routes.GetTrack(_tramId), StartTime);
-
             if(Routes.ToCS(tram.Direction))
             {
                 Console.WriteLine("Trams waiting to at " + _depStation + " to CS: " + station.WaitingTramsToCS.Count);
