@@ -28,50 +28,53 @@ namespace TramSimulator
             {
 
                 //debug
-                var stations = simState.Stations;
-                var trams = simState.Trams;
-                var centralToPR = simState.Routes.CentralToPR;
-                var prToCentral = simState.Routes.PRToCentral;
-                var eventQueue = simState.EventQueue;
-                for (int i = 0; i < stations.Count; i++)
+                if (false)
                 {
-                    Station st = stations.Values.ToArray()[i];
-                    Console.WriteLine("StationA : {0} WaitingP : {1} WaitingT : {2} ", st.Name, st.WaitingPersonsA.Count, st.WaitingTramsA.Count);
-                    Console.WriteLine("StationB : {0} WaitingP : {1} WaitingT : {2} ", st.Name, st.WaitingPersonsB.Count, st.WaitingTramsB.Count);
-                }
-                //Console.WriteLine("From Central to PR");
-                for (int i = 0; i < centralToPR.Count; i++)
-                {
-                    Track t = centralToPR[i];
-                    Console.WriteLine("Track " + t.From + " to " + t.To);
-                    t.Trams.ForEach(x => Console.WriteLine("\t tram: " + x));
-                }
-                //Console.WriteLine("From PR to Central");
-                for (int i = 0; i < prToCentral.Count; i++)
-                {
-                    Track t = prToCentral[i];
-                    Console.WriteLine("Track " + t.From + " to " + t.To);
-                    t.Trams.ForEach(x => Console.WriteLine("\t tram: " + x));
-                }
-                Console.WriteLine("Trams at stations:");
-                simState.Trams.Values.ToList().ForEach(x =>
-                {
-                    if (x.State == Tram.TramState.AtStation)
+                    var stations = simState.Stations;
+                    var trams = simState.Trams;
+                    var centralToPR = simState.Routes.CentralToPR;
+                    var prToCentral = simState.Routes.PRToCentral;
+                    var eventQueue = simState.EventQueue;
+                    for (int i = 0; i < stations.Count; i++)
                     {
-                        Console.WriteLine(x.Station + " " + x.TramId);
+                        Station st = stations.Values.ToArray()[i];
+                        Console.WriteLine("StationA : {0} WaitingP : {1} WaitingT : {2} ", st.Name, st.WaitingPersonsA.Count, st.WaitingTramsA.Count);
+                        Console.WriteLine("StationB : {0} WaitingP : {1} WaitingT : {2} ", st.Name, st.WaitingPersonsB.Count, st.WaitingTramsB.Count);
                     }
-                });
-                var eventQueueSorted = eventQueue.EventList.OrderBy(x => x.StartTime).ToList();
+                    //Console.WriteLine("From Central to PR");
+                    for (int i = 0; i < centralToPR.Count; i++)
+                    {
+                        Track t = centralToPR[i];
+                        Console.WriteLine("Track " + t.From + " to " + t.To);
+                        t.Trams.ForEach(x => Console.WriteLine("\t tram: " + x));
+                    }
+                    //Console.WriteLine("From PR to Central");
+                    for (int i = 0; i < prToCentral.Count; i++)
+                    {
+                        Track t = prToCentral[i];
+                        Console.WriteLine("Track " + t.From + " to " + t.To);
+                        t.Trams.ForEach(x => Console.WriteLine("\t tram: " + x));
+                    }
+                    Console.WriteLine("Trams at stations:");
+                    simState.Trams.Values.ToList().ForEach(x =>
+                    {
+                        if (x.State == Tram.TramState.AtStation)
+                        {
+                            Console.WriteLine(x.Station + " " + x.TramId);
+                        }
+                    });
+                    var eventQueueSorted = eventQueue.EventList.OrderBy(x => x.StartTime).ToList();
 
-                Console.WriteLine("Current scheduled events: ");
-                eventQueueSorted.ForEach(x => Console.WriteLine("\t event: " + x.ToString()));
+                    Console.WriteLine("Current scheduled events: ");
+                    eventQueueSorted.ForEach(x => Console.WriteLine("\t event: " + x.ToString()));
 
-
+                }
 
                 Event e = simState.EventQueue.Next();
                 e.execute(simState);
-                //if(! e.GetType().Equals(typeof(PersonArrival)))
-                // Console.ReadLine();
+
+                //if (!e.GetType().Equals(typeof(PersonArrival)))
+                //    Console.ReadLine();
                 if (e.StartTime >= 60 * 60 * 22) break;
                 //Console.WriteLine(e.ToString());
             }
@@ -113,11 +116,11 @@ namespace TramSimulator
                 trams[i] = new Tram(i, 0);
                 trams[i].Station = stationNames[stationNames.Length - 1];
                 trams[i].State = Tram.TramState.AtShuntyard;
-                eventQueue.AddEvent(new EnterTrack(i, startTime + (i * minutesPerTram * 60), stations.Values.ToArray()[stationNames.Length - 1].Name));
+                eventQueue.AddEvent(new EnterTrack(i, startTime + (i * minutesPerTram * 60), stations.Values.ToArray()[0].Name));
             }
 
-            var centralToPR = GenerateRoute(stationNames);
-            var prToCentral = GenerateRoute(stationNames.Reverse().ToArray());
+            var prToCentral = GenerateRoute(stationNames);
+            var centralToPR = GenerateRoute(stationNames.Reverse().ToArray());
 
             var routes = new Routes(centralToPR, prToCentral);
 

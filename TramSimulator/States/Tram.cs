@@ -24,7 +24,7 @@ namespace TramSimulator.States
         public Tram(int tramId, double departureTime)
         {
             this._tramId = tramId;
-            this.DepartureTime = departureTime;
+            //this.DepartureTime = departureTime;
             PersonsOnTram = new List<Person>();
 
         }

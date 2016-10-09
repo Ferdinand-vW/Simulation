@@ -42,8 +42,6 @@ namespace TramSimulator.Events
             var station = simState.Stations[_arrStation];
             var tram = simState.Trams[_tramId];
             bool typeA = simState.Routes.OnA(_tramId);
-            string pr = simState.Routes.CentralToPR[0].From;
-            string cs = simState.Routes.PRToCentral[0].From;
 
             if (typeA) station.TramIsStationedA = true;
             else station.TramIsStationedB = true;

@@ -41,7 +41,7 @@ namespace TramSimulator
         {
             numberOfRounds++;
             double oneWayDrivingTime = 17 * 60;
-            double turnAroundTime = 10 * 60;
+            double turnAroundTime = 4 * 60;
             this.startTime = startTime;
             halfTime = startTime + oneWayDrivingTime + turnAroundTime;
             totalTime = halfTime + oneWayDrivingTime + turnAroundTime;

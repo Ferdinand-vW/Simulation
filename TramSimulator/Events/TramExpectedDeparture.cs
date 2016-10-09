@@ -27,7 +27,7 @@ namespace TramSimulator.Events
             var tram = simState.Trams[_tramId];
 
             //Find the next tram
-            int? id = simState.Routes.NextTram(tram.TramId, _depStation);
+            int? id = simState.Routes.NextTram(_tramId, _depStation);
             double currTime = StartTime;
             double timeFromCentral = simState.TimeTables[_tramId].halfTime;
             double timeFromPR = simState.TimeTables[_tramId].startTime;
@@ -68,6 +68,7 @@ namespace TramSimulator.Events
             bool onA = simState.Routes.OnA(_tramId);
             //Handle departure of a tram
             tram.State = Tram.TramState.OnTrack;
+            tram.DepartureTime = StartTime;
 
             if (onA) station.TramIsStationedA = false; 
             else station.TramIsStationedB = false; 
@@ -78,11 +79,10 @@ namespace TramSimulator.Events
             simState.TimeTables[_tramId].update(StartTime, _depStation);
 
             //if there was a tram waiting create an arrival event
-            if (station.WaitingTrams(onA,_tramId))
+            if (station.WaitingTrams(onA))
             {
-                int wTramId;
-                if (onA) wTramId = station.WaitingTramsA.Dequeue();
-                else wTramId = station.WaitingTramsB.Dequeue();
+                int wTramId = station.Dequeue(onA);
+
                 eventQueue.AddEvent(new TramExpectedArrival(wTramId,StartTime, _depStation));
             }
         }

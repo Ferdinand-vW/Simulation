@@ -23,12 +23,12 @@ namespace TramSimulator.Events
         public override void execute(SimulationState simState)
         {
             Station station = simState.Stations[_stationName];
-            if (typeA) {
+
+            if (typeA)
                 station.WaitingPersonsA.Enqueue(new Person(StartTime));
-            }
-            else {
+            else 
                 station.WaitingPersonsB.Enqueue(new Person(StartTime));
-            }
+
 
 
             if (simState.Rates.nonZeroPercentage(_stationName, typeA, StartTime))

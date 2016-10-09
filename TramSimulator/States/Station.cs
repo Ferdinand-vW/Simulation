@@ -36,6 +36,25 @@ namespace TramSimulator.States
                 return (WaitingTramsB.Count > 0) ? ((WaitingTramsB.Peek() != tramId)) : false;
         }
 
+        public bool WaitingTrams(bool typeA)
+        {
+            if (typeA)
+                return (WaitingTramsA.Count > 0);
+            else
+                return (WaitingTramsB.Count > 0);
+        }
+
+        public int Dequeue(bool typeA)
+        {
+            if (typeA)
+            {
+                return WaitingTramsA.Dequeue();
+            }
+            else {
+                return WaitingTramsB.Dequeue();
+            }
+        }
+
         public bool TramIsStationed(bool typeA)
         {
             return typeA ? TramIsStationedA : TramIsStationedB;
