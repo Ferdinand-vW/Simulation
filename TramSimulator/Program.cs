@@ -16,12 +16,10 @@ namespace TramSimulator
     class Program
     {
         static void Main(string[] args)
-
-
         {
 
-            String patha = @"C:\Users\Rogier\Documents\Master\alg\Simulation\a_data_updated.csv";
-            String pathb = @"C:\Users\Rogier\Documents\Master\alg\Simulation\b_data_updated.csv";
+            String patha = @"..\..\..\a_data_updated.csv";
+            String pathb = @"..\..\..\b_data_updated.csv";
 
             Stream streama = File.Open(patha, FileMode.Open);
             Stream streamb = File.Open(pathb, FileMode.Open);
@@ -49,7 +47,6 @@ namespace TramSimulator
             enterPrognoseA["Galgenwaard"] = 606;
             enterPrognoseA["Vaartscherijn"] = 1261;
             enterPrognoseA["CS"] = 0;
-
 
             exitPrognoseA["PR"] = 0;
             exitPrognoseA["WKZ"] = 0;
@@ -81,31 +78,14 @@ namespace TramSimulator
             exitPrognoseB["WKZ"] = 644 / 659;
             exitPrognoseB["PR"] = 1;
 
-
             Data a = new Data(enterPrognoseA, exitPrognoseA);
             Data b = new Data(enterPrognoseB, exitPrognoseB);
-            foreach (PassengerCount pc in passengerCountsA)
-                a.AddPC(pc);
-            foreach (PassengerCount pc in passengerCountsB)
-                b.AddPC(pc);
-
+            passengerCountsA.ForEach(x => a.AddPC(x));
+            passengerCountsB.ForEach(x => b.AddPC(x));
 
             Simulation sim = new Simulation(a,b);
-            sim.run(2, null, DayOfWeek.Monday, new string[] { "PR", "WKZ", "UMC", "Heidelberglaan", "Padualaan", "Kromme Rijn", "Galgenwaard", "Vaartscherijn", "CS" });
-            return;
-            //Some example output
-            //Console.WriteLine("Number of passengercounts: " + passengerCountsA.Count);
-            //Console.WriteLine(passengerCountsA[0].Trip);
-            //Console.WriteLine(passengerCountsA[0].Date);
-            //Console.WriteLine(passengerCountsA[0].Time.Hour);
-            //foreach (var kvp in passengerCountsA[0].EnteringCounts)
-            //{
-            //    Console.WriteLine(kvp.Key + ": " + kvp.Value);
-            //}
-            //foreach (var kvp in passengerCountsA[0].DepartingCounts)
-            //{
-            //    Console.WriteLine(kvp.Key + ": " + kvp.Value);
-            //}
+            sim.run(5, null, DayOfWeek.Monday, enterPrognoseA.Keys.ToArray());
+
             Console.ReadLine();
         }
 

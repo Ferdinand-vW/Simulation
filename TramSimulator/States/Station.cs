@@ -8,18 +8,30 @@ namespace TramSimulator.States
 {
     public class Station
     {
-        public Queue<Person> WaitingPersons { get; set; }
-        public Queue<int> WaitingTrams { get; set; }
         readonly String _name;
         public String Name { get { return _name; } }
-        public bool TramIsStationed { get; set; }
+
+        public Queue<Person> WaitingPersonsToPR { get; set; }
+        public Queue<Person> WaitingPersonsToCS { get; set; }
+        public Queue<int> WaitingTramsToPR { get; set; }
+        public Queue<int> WaitingTramsToCS { get; set; }
+        public bool TramIsStationedPR { get; set; }
+        public bool TramIsStationedCS { get; set; }
 
         public Station(String name)
         {
             this._name = name;
-            this.WaitingPersons = new Queue<Person>();
-            this.WaitingTrams = new Queue<int>();
-            this.TramIsStationed = false;
+            this.WaitingPersonsToPR = new Queue<Person>();
+            this.WaitingPersonsToCS = new Queue<Person>();
+            this.WaitingTramsToPR = new Queue<int>();
+            this.WaitingTramsToCS = new Queue<int>();
+            this.TramIsStationedPR = false;
+            this.TramIsStationedCS = false;
+        }
+
+        public static bool IsEndStation(string name)
+        {
+            return name == "PR" || name == "CS";
         }
         
     }

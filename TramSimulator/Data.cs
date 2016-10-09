@@ -44,9 +44,34 @@ namespace TramSimulator
             string busStop = stationToBus[station];
             return days[day].EnteringFQ(busStop, time) * enterPrognose[station];
         }
-        public double departPercentage(string station) {
+
+        public int EnteringTotal(DayOfWeek day, string station)
+        {
+            return days[day].EnteringTotal(stationToBus[station]);
+        }
+
+        public double DepartingFQ(DayOfWeek day, string station, double time)
+        {
+            string busStop = stationToBus[station];
+            return days[day].DepartingFQ(busStop, time) * exitPrognose[station];
+        }
+
+        public double DepartingPercentage(DayOfWeek day, string station, double time)
+        {
+            string busStop = stationToBus[station];
+            return days[day].DepartingFQ(busStop, time);
+        }
+
+        public int DepartingTotal(DayOfWeek day, string station)
+        {
+            return days[day].DepartingTotal(stationToBus[station]);
+        }
+
+        public double DepartPercentage(string station)
+        {
             return exitPrognose[station];
         }
+
         class DayData
         {
             Dictionary<int, Min15Block> blocks;
@@ -61,15 +86,41 @@ namespace TramSimulator
             public double EnteringFQ(string busStop, double time)
             {
                 int min = (int)time / 60;
+                //0,15,30 or 45minutes
                 min = min - (min % 15);
+                //determine the frequency for this block
                 double fq = blocks.ContainsKey(min) ? blocks[min].EnteringFQ(busStop) : 0;
-                return fq /totals[busStop];
+
+                //Some stops don't have any entering passengers, in that case we can just return a rate of 0
+                if (totals[busStop] == 0) { return 0; }
+                else { return fq / totals[busStop]; }
+            }
+
+            public double DepartingFQ(string busStop, double time)
+            {
+                int min = (int)time / 60;
+                min -= min % 15;
+                double fq = blocks.ContainsKey(min) ? blocks[min].DepartingFQ(busStop) : 0;
+
+                if(totals[busStop] == 0) { return 0; }
+                else { return fq / totals[busStop]; }
+            }
+
+            public int EnteringTotal(string busStop)
+            {
+                return totals[busStop];
+            }
+
+            public int DepartingTotal(string busStop)
+            {
+                return totals[busStop];
             }
 
             public void AddPC(PassengerCount pc)
             {
                 foreach (var kvp in pc.EnteringCounts)
                 {
+                    //Add enter counts to totals
                     if (totals.ContainsKey(kvp.Key))
                         totals[kvp.Key] += kvp.Value;
                     else {
@@ -77,6 +128,7 @@ namespace TramSimulator
                     }
                 }
 
+                //add enter counts to a block
                 int min = pc.Time.Hour * 60 + pc.Time.Minute;
                 min = min - (min % 15);
                 if (blocks.ContainsKey(min))
@@ -102,11 +154,12 @@ namespace TramSimulator
                 }
                 public double EnteringFQ(string busStop)
                 {
-                    //niet correct
-                    double feq = 0;
-                    foreach (PassengerCount pc in PCs)
-                        feq += pc.EnteringCounts[busStop];
-                    return feq;
+                    return PCs.Sum(x => x.EnteringCounts[busStop]);
+                }
+
+                public double DepartingFQ(string busStop)
+                {
+                    return PCs.Sum(x => x.DepartingCounts[busStop]);
                 }
             }
         }

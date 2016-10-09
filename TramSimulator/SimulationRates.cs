@@ -2,6 +2,8 @@ using System;
 using System.Linq;
 using System.Collections.Generic;
 
+using TramSimulator.States;
+
 namespace TramSimulator
 {
     public class SimulationRates
@@ -17,10 +19,10 @@ namespace TramSimulator
             this.day = day;
         }
 
-        public double PersonArrivalRate(string station, bool typeA, double time)
+        public double PersonArrivalRate(string station, Routes.Dir dir, double time)
         {
             double avgPersonPer15Min;
-            if (typeA)
+            if (Routes.ToCS(dir))
                 avgPersonPer15Min = a.EnteringFQ(day, station, time);
             else
                 avgPersonPer15Min = b.EnteringFQ(day, station, time);
@@ -29,8 +31,9 @@ namespace TramSimulator
 
             return distNextEvent;
         }
-        public bool nonZeroPercentage(double time, string station, bool typeA) {
-            return typeA ? 0 == a.EnteringFQ(day, station, time) : 0 == b.EnteringFQ(day, station, time);
+        public bool nonZeroPercentage(double time, string station, Routes.Dir dir) {
+            return Routes.ToCS(dir) ? 0 == a.EnteringFQ(day, station, time) 
+                                          : 0 == b.EnteringFQ(day, station, time);
         }
 
         public double TramArrivalRate(string depStation, string arrStation)
@@ -75,19 +78,34 @@ namespace TramSimulator
             return Double.MaxValue;
         }
 
-        public double DelayRate(string station)
+        public bool DoorMalfunction()
         {
-            throw new NotImplementedException();
+            return Generate.uniform(0, 5) == 0;
         }
 
-        public double TramEmptyRate(string station)
+        public int TramEmptyRate(string station, Routes.Dir dir, Tram tram)
         {
-            throw new NotImplementedException();
+            double fillRatio = tram.PersonsOnTram.Count / Tram.CAPACITY;
+            //number of people that leave the tram
+            return (int)(Routes.ToCS(dir) ? a.DepartPercentage(station) * fillRatio
+                                          : b.DepartPercentage(station) * fillRatio);
         }
 
-        public double TramFillRate(string station)
+        public double TramEmptyTime(int npss)
         {
-            throw new NotImplementedException();
+            return (npss / Tram.CAPACITY) * 60;
+        }
+
+        public int TramFillRate(Station station, Tram tram)
+        {
+            var waitingPersons = Routes.ToCS(tram.Direction) ? station.WaitingPersonsToPR
+                                                             : station.WaitingPersonsToCS;
+            return Math.Min(Tram.CAPACITY - tram.PersonsOnTram.Count, waitingPersons.Count);
+        }
+
+        public double TramFillTime(int npss)
+        {
+            return (npss / Tram.CAPACITY) * 60;
         }
 
 

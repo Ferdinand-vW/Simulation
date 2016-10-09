@@ -11,21 +11,23 @@ namespace TramSimulator.States
     // State of Tram includes station i and if it is on track between i and i+1
     public class Tram
     {
-        public enum TramState { AtStation, Waiting, OnTrack, Delayed, AtShuntyard};
+        public enum TramState { AtStation, Waiting, OnTrack, Delayed, AtShuntyard };
 
         public string Station { get; set; }
         public TramState State { get; set; }
-        const int capacity = 420;
+        public const int CAPACITY = 420;
         readonly int _tramId;
         public int TramId { get { return _tramId; } }
         public double DepartureTime { get; set; }
         public List<Person> PersonsOnTram { get; set; }
+        public Routes.Dir Direction { get; set; }
 
         public Tram(int tramId, double departureTime)
         {
             this._tramId = tramId;
             this.DepartureTime = departureTime;
-            PersonsOnTram = new List<Person>();
+            this.PersonsOnTram = new List<Person>();
+            this.Direction = Routes.Dir.ToCS;
 
         }
         public void EmptyTram(double emptyRate)
@@ -36,33 +38,17 @@ namespace TramSimulator.States
                 PersonsOnTram.RemoveAt((int)Generate.uniform(0, PersonsOnTram.Count - 1));
             }
         }
-        public void FillTram(List<Person> waitingPersons)
+        public void FillTram(Queue<Person> waitingPersons, double fillRate)
         {
-            while (PersonsOnTram.Count < capacity && waitingPersons.Count > 0)
+            //The fillrate should never be higher than the number of waiting persons at a station
+            //If that happens anyway, then we are okay with getting an exception
+            while (PersonsOnTram.Count < CAPACITY && fillRate > 0 && waitingPersons.Count > 0)
             {
-                Person p = waitingPersons[0];
-                waitingPersons.RemoveAt(0);
+                Person p = waitingPersons.Dequeue();
                 PersonsOnTram.Add(p);
+                fillRate -= 1;
             }
 
-        }
-
-        //Waar hebben we deze methoden voor nodig?
-        public Tram NextTram()
-        {
-            //if (0 == index)
-               // return trams[trams.Length - 1];
-           // else
-               // return trams[index - 1];
-            return null;
-        }
-        public Tram PreviousTram()
-        {
-            //if (trams.Length - 1 == index)
-              //  return trams[0];
-           // else
-                //return trams[index + 1];
-            return null;
         }
     }
 }

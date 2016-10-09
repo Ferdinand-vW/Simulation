@@ -13,25 +13,35 @@ namespace TramSimulator.Events
     public class PersonArrival : Event
     {
         string _stationName;
-        bool typeA;
-        public PersonArrival(double startTime, string stationName, bool typeA)
+        Routes.Dir _direction;
+
+        public PersonArrival(double startTime, string stationName, Routes.Dir dir)
         {
             this.StartTime = startTime;
-            this.typeA = typeA;
+            this._direction = dir;
             this._stationName = stationName;
         }
         public override void execute(SimulationState simState)
         {
             Station station = simState.Stations[_stationName];
-            station.WaitingPersons.Enqueue(new Person(StartTime));
-            if (simState.Rates.nonZeroPercentage(StartTime, _stationName, typeA))
+            if(_direction == Routes.Dir.ToCS)
             {
-                double newTime = simState.Rates.PersonArrivalRate(_stationName, typeA, StartTime);
-                simState.EventQueue.AddEvent(new PersonArrival(newTime, _stationName, typeA));
+                station.WaitingPersonsToCS.Enqueue(new Person(StartTime));
             }
-            else {
+            else
+            {
+                station.WaitingPersonsToPR.Enqueue(new Person(StartTime));
+            }
+
+            if (simState.Rates.nonZeroPercentage(StartTime, _stationName, _direction))
+            {
+                double newTime = simState.Rates.PersonArrivalRate(_stationName, _direction, StartTime);
+                simState.EventQueue.AddEvent(new PersonArrival(newTime, _stationName, _direction));
+            }
+            else
+            {
                 double newTime = StartTime + ((15 * 60) - (StartTime % (15 * 60)));
-                simState.EventQueue.AddEvent(new ZeroPersonArrival(newTime, _stationName, typeA));
+                simState.EventQueue.AddEvent(new ZeroPersonArrival(newTime, _stationName, _direction));
             }
         }
 

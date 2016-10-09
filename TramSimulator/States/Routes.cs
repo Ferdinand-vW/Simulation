@@ -11,6 +11,8 @@ namespace TramSimulator.States
         public List<Track> CentralToPR { get; set; }
         public List<Track> PRToCentral { get; set; }
 
+        public enum Dir { ToPR, ToCS };
+
         public Routes(List<Track> centralToPR, List<Track> prToCentral)
         {
             this.CentralToPR = centralToPR;
@@ -37,6 +39,16 @@ namespace TramSimulator.States
             {
                 return t.To;
             }
+        }
+
+        public static bool ToCS(Dir dir)
+        {
+            return dir == Dir.ToCS;
+        }
+
+        public static bool ToPR(Dir dir)
+        {
+            return dir == Dir.ToPR;
         }
 
         public void MoveToNextTrack(int tramId, string depStation)
