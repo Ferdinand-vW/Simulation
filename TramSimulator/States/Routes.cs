@@ -70,6 +70,12 @@ namespace TramSimulator.States
             return (track1 == null ? track2 : track1);
         }
 
+        public bool OnA(int tramId)
+        {
+            var track1 = CentralToPR.Find(x => x.Trams.Contains(tramId));
+            return track1 == null ;
+        }
+
         private Track GetNextTrack(string depStation, string prevStation)
         {
 

@@ -10,10 +10,12 @@ namespace TramSimulator
 {
     public class TimeTable
     {
-        public Dictionary<Track, double> expectedTime;
-        public Dictionary<Track, double> totalDelay;
-        public Dictionary<Track, double> maxDelay;
-        public Dictionary<Track, int> numberOverOneMinute;
+        public double PRtotalDelay;
+        public double PRmaxDelay;
+        public int PRnumberOverOneMinute;
+        public double CStotalDelay;
+        public double CSmaxDelay;
+        public int CSnumberOverOneMinute;
         public int numberOfRounds;
 
         public double startTime;
@@ -21,71 +23,65 @@ namespace TramSimulator
         public double totalTime; //voor de volgende timeTable
 
 
-
-        public TimeTable(SimulationRates rates, Routes routes, double startTime)
+        public TimeTable(double startTime)
         {
-            totalDelay = new Dictionary<Track, double>();
-            maxDelay = new Dictionary<Track, double>();
-            numberOverOneMinute = new Dictionary<Track, int>();
-            foreach (Track t in routes.CentralToPR)
-            {
-                totalDelay.Add(t, 0);
-                maxDelay.Add(t, 0);
-                numberOverOneMinute.Add(t, 0);
-            }
-            foreach (Track t in routes.PRToCentral)
-            {
-                totalDelay.Add(t, 0);
-                maxDelay.Add(t, 0);
-                numberOverOneMinute.Add(t, 0);
-            }
+
+            PRtotalDelay = 0;
+            PRmaxDelay = 0;
+            PRnumberOverOneMinute = 0;
+            CStotalDelay = 0;
+            CSmaxDelay = 0;
+            CSnumberOverOneMinute = 0;
             numberOfRounds = 0;
-            renewTimeTable(rates, routes, startTime);
+
+            renewTimeTable(startTime);
         }
 
-        public void renewTimeTable(SimulationRates rates, Routes routes, double startTime)
+        public void renewTimeTable(double startTime)
         {
             numberOfRounds++;
+            double oneWayDrivingTime = 17 * 60;
+            double turnAroundTime = 4 * 60;
             this.startTime = startTime;
-            double dwellTime = 30; //hier moet iets logisch staan
-
-            expectedTime = new Dictionary<Track, double>();
-
-            double time = startTime;
-            for (int i = 0; i < routes.CentralToPR.Count; i++)
-            {
-                Track track = routes.CentralToPR[i];
-                expectedTime.Add(track, time);
-                time += rates.AvgTramArrival( track.To,track.From) + dwellTime;
-
-            }
-            double reverse = 180;
-            time += reverse;
-            halfTime = time;
-            for (int i = 0; i < routes.PRToCentral.Count; i++)
-            {
-                Track track = routes.PRToCentral[i];
-                expectedTime.Add(track, time);
-                time += rates.AvgTramArrival(track.To, track.From) + dwellTime;
-
-            }
-            time += reverse;
-            totalTime = time;
+            halfTime = startTime + oneWayDrivingTime + turnAroundTime;
+            totalTime = halfTime + oneWayDrivingTime + turnAroundTime;
+        }
+        public void update(double time, string depStation) {
+            if (depStation == "PR")
+                addTimePR(time);
+            else if (depStation == "CS")
+                addTimeCS(time);
         }
 
-        public void addTime(Track track, double time)
+        public void addTimePR(double time)
         {
-            double delay = time - expectedTime[track];
+            double delay = time - startTime;
             if (delay > 0)
             {
-                totalDelay[track] += delay;
+                PRtotalDelay += delay;
             }
             if (delay > 1)
             {
-                numberOverOneMinute[track] += 1;
+                PRnumberOverOneMinute += 1;
             }
-            if (delay > maxDelay[track])
-                maxDelay[track] = delay;
+            if (delay > PRmaxDelay)
+                PRmaxDelay = delay;
+        }
+        public void addTimeCS(double time)
+        {
+            double delay = time - halfTime;
+            if (delay < 0)
+                Console.ReadLine();
+            if (delay > 0)
+            {
+                CStotalDelay += delay;
+            }
+            if (delay > 60)
+            {
+                CSnumberOverOneMinute += 1;
+            }
+            if (delay > CSmaxDelay)
+                CSmaxDelay = delay;
         }
     }
 }

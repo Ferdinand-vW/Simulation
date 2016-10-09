@@ -14,10 +14,10 @@ namespace Test
         public void TestPriority()
         {
             EventQueue eventQueue = new EventQueue();
-            eventQueue.AddEvent(new PersonArrival(5.0, "alpha"));
-            eventQueue.AddEvent(new PersonArrival(10.0, "beta"));
-            eventQueue.AddEvent(new PersonArrival(3.0, "gamma"));
-            eventQueue.AddEvent(new PersonArrival(6.0, "delta"));
+            eventQueue.AddEvent(new PersonArrival(5.0, "alpha", Routes.Dir.ToCS));
+            eventQueue.AddEvent(new PersonArrival(10.0, "beta", Routes.Dir.ToCS));
+            eventQueue.AddEvent(new PersonArrival(3.0, "gamma", Routes.Dir.ToCS));
+            eventQueue.AddEvent(new PersonArrival(6.0, "delta", Routes.Dir.ToCS));
 
             Event e1 = eventQueue.Next();
             Event e2 = eventQueue.Next();
