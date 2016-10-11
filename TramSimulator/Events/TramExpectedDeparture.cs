@@ -67,6 +67,9 @@ namespace TramSimulator.Events
             var nextStation = simState.Routes.NextStation(_tramId, _depStation);
             var arrTime = StartTime + simState.Rates.TramArrivalRate(_depStation, nextStation);
 
+            //update timeTable
+            simState.TimeTables[_tramId].update(StartTime,_depStation);
+
             //Handle departure of a tram
             tram.State = Tram.TramState.OnTrack;
             eventQueue.AddEvent(new TramExpectedArrival(_tramId, arrTime, nextStation));
