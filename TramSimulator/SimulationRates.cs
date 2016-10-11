@@ -38,7 +38,7 @@ namespace TramSimulator
 
         public double TramArrivalRate(string depStation, string arrStation)
         {
-            return AvgTramArrival(depStation, arrStation);
+            return Generate.logNormalWitouthVariance(AvgTramArrival(depStation, arrStation));
         }
 
         public double AvgTramArrival(string depStation, string arrStation)

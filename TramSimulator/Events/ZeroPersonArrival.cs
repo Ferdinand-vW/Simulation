@@ -20,7 +20,7 @@ namespace TramSimulator.Events
         }
         public override void execute(SimulationState simState)
         {
-            if (!simState.Rates.nonZeroPercentage(StartTime, _stationName, _direction))
+            if (simState.Rates.nonZeroPercentage(StartTime, _stationName, _direction))
             {
                 double newTime = StartTime + simState.Rates.PersonArrivalRate(_stationName, _direction, StartTime);
                 simState.EventQueue.AddEvent(new PersonArrival(newTime, _stationName, _direction));

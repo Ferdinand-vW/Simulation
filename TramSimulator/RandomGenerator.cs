@@ -31,6 +31,27 @@ namespace TramSimulator
             //double lambda = (double)1 / u;
             return Math.Log(1 - Instance.random.NextDouble()) / (-u);
         }
+        public static double logNormalWitouthVariance(double mean) {
+            return logNormal(mean * 0.32, mean);
+        }
+
+        public static double logNormal(double variance, double mean)
+        {
+            //  mean and standard deviation of the variable’s natural logarithm
+            // https://en.wikipedia.org/wiki/Log-normal_distribution
+            double mu = Math.Log(mean / Math.Sqrt(1 + (variance / (mean * mean))));
+            double sigma = Math.Sqrt(Math.Log(1 + (variance / (mean * mean))));
+
+            return Math.Exp(normal(sigma,mu));
+        }
+
+        public static double normal(double sigma, double mu)
+        {
+            double u1 = Instance.random.NextDouble();
+            double u2 = Instance.random.NextDouble();
+            double normal = Math.Sqrt(-2.0 * Math.Log(u1)) * Math.Sin(2.0 * Math.PI * u2);
+            return mu + (sigma * normal);
+        }
         //Called with Generate.uniform(low,high)
         static public double uniform(double low, double high)
         {
