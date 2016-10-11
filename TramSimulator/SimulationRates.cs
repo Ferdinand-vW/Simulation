@@ -33,7 +33,7 @@ namespace TramSimulator
         }
         public bool nonZeroPercentage(double time, string station, Routes.Dir dir) {
             return Routes.ToCS(dir) ? 0 == a.EnteringFQ(day, station, time) 
-                                          : 0 == b.EnteringFQ(day, station, time);
+                                    : 0 == b.EnteringFQ(day, station, time);
         }
 
         public double TramArrivalRate(string depStation, string arrStation)

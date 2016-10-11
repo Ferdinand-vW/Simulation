@@ -84,7 +84,14 @@ namespace TramSimulator
             passengerCountsB.ForEach(x => b.AddPC(x));
 
             Simulation sim = new Simulation(a,b);
-            sim.run(5, null, DayOfWeek.Monday, enterPrognoseA.Keys.ToArray());
+            var results = sim.run(5, null, DayOfWeek.Monday, enterPrognoseA.Keys.ToArray());
+
+            var trams = results.TimeTables.Values.ToList();
+
+            //Maximum delay of a tram
+            Console.Write("Maximum delay: ");
+            Console.WriteLine(trams.Max(x => Math.Max(x.PRmaxDelay, x.CSmaxDelay)));
+            
 
             Console.ReadLine();
         }
