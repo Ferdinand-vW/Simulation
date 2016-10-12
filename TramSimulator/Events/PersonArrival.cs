@@ -24,13 +24,18 @@ namespace TramSimulator.Events
         public override void execute(SimulationState simState)
         {
             Station station = simState.Stations[_stationName];
+            var persons = simState.Persons;
             if(_direction == Routes.Dir.ToCS)
             {
-                station.WaitingPersonsToCS.Enqueue(new Person(StartTime));
+                int pid = persons.Count;
+                persons.Add(pid, new Person(pid, StartTime));
+                station.WaitingPersonsToCS.Enqueue(pid);
             }
             else
             {
-                station.WaitingPersonsToPR.Enqueue(new Person(StartTime));
+                int pid = persons.Count;
+                persons.Add(pid, new Person(pid, StartTime));
+                station.WaitingPersonsToPR.Enqueue(pid);
             }
 
             if (!simState.Rates.nonZeroPercentage(StartTime, _stationName, _direction))

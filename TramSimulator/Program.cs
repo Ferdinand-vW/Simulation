@@ -17,7 +17,7 @@ namespace TramSimulator
     {
         static void Main(string[] args)
         {
-
+            Console.WriteLine("Start reading passengercount data..");
             String patha = @"..\..\..\a_data_updated.csv";
             String pathb = @"..\..\..\b_data_updated.csv";
 
@@ -83,15 +83,27 @@ namespace TramSimulator
             passengerCountsA.ForEach(x => a.AddPC(x));
             passengerCountsB.ForEach(x => b.AddPC(x));
 
+            Console.WriteLine("Finished reading passengercount data");
+            Console.WriteLine("Start simulation");
             Simulation sim = new Simulation(a,b);
             var results = sim.run(5, null, DayOfWeek.Monday, enterPrognoseA.Keys.ToArray());
 
             var trams = results.TimeTables.Values.ToList();
+            var persons = results.Persons.Values.ToList();
 
             //Maximum delay of a tram
             Console.Write("Maximum delay: ");
             Console.WriteLine(trams.Max(x => Math.Max(x.PRmaxDelay, x.CSmaxDelay)));
-            
+            //Average total delay of a tram
+            Console.Write("Average delay: ");
+            Console.WriteLine(trams.Sum(x => x.PRtotalDelay + x.CStotalDelay) / trams.Count);
+            //Max waiting time of a person
+            Console.Write("Maximum waiting time: ");
+            Console.WriteLine(persons.Max(x => x.WaitingTime));
+            //Average waiting time of a person
+            Console.Write("Average waiting time: ");
+            Console.WriteLine(persons.Sum(x => x.WaitingTime) / persons.Count);
+
 
             Console.ReadLine();
         }

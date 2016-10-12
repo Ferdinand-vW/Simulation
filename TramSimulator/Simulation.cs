@@ -102,10 +102,6 @@ namespace TramSimulator
                 Console.WriteLine("Event " + n + ": " + e.ToString());
                 n++;
             }
-                e.execute(simState);
-                Console.WriteLine("Event " + n + ": " + e.ToString());
-                n++;
-            }
 
             return simState;
         }

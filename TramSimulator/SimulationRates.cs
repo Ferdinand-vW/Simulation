@@ -86,7 +86,7 @@ namespace TramSimulator
         public int TramEmptyRate(string station, Routes.Dir dir, Tram tram)
         {
             double fillRatio = tram.PersonsOnTram.Count / Tram.CAPACITY;
-            //number of people that leave the tram
+            //Percentage of people that leave the tram
             return (int)(Routes.ToCS(dir) ? a.DepartPercentage(station) * fillRatio
                                           : b.DepartPercentage(station) * fillRatio);
         }
@@ -98,8 +98,8 @@ namespace TramSimulator
 
         public int TramFillRate(Station station, Tram tram)
         {
-            var waitingPersons = Routes.ToCS(tram.Direction) ? station.WaitingPersonsToPR
-                                                             : station.WaitingPersonsToCS;
+            var waitingPersons = Routes.ToCS(tram.Direction) ? station.WaitingPersonsToCS
+                                                             : station.WaitingPersonsToPR;
             return Math.Min(Tram.CAPACITY - tram.PersonsOnTram.Count, waitingPersons.Count);
         }
 
