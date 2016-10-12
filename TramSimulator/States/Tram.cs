@@ -19,35 +19,39 @@ namespace TramSimulator.States
         readonly int _tramId;
         public int TramId { get { return _tramId; } }
         public double DepartureTime { get; set; }
-        public List<Person> PersonsOnTram { get; set; }
+        public List<int> PersonsOnTram { get; set; }
         public Routes.Dir Direction { get; set; }
 
         public Tram(int tramId, double departureTime)
         {
             this._tramId = tramId;
             this.DepartureTime = departureTime;
-            this.PersonsOnTram = new List<Person>();
+            this.PersonsOnTram = new List<int>();
             this.Direction = Routes.Dir.ToCS;
 
         }
-        public void EmptyTram(double emptyRate)
+        public int EmptyTram(double emptyRate)
         {
-            int i = (int)(PersonsOnTram.Count * emptyRate);
-            for (int j = 0; j < i; j++)
-            {
-                PersonsOnTram.RemoveAt((int)Generate.uniform(0, PersonsOnTram.Count - 1));
-            }
+            int count = PersonsOnTram.Count;
+            PersonsOnTram = PersonsOnTram.Where(x => Generate.uniform(0, 1) >= emptyRate).ToList();
+
+            return count - PersonsOnTram.Count;
         }
-        public void FillTram(Queue<Person> waitingPersons, double fillRate)
+        public List<int> FillTram(Queue<int> waitingPersons, double fillRate)
         {
+            var entered = new List<int>();
+
             //The fillrate should never be higher than the number of waiting persons at a station
             //If that happens anyway, then we are okay with getting an exception
             while (PersonsOnTram.Count < CAPACITY && fillRate > 0 && waitingPersons.Count > 0)
             {
-                Person p = waitingPersons.Dequeue();
+                int p = waitingPersons.Dequeue();
                 PersonsOnTram.Add(p);
                 fillRate -= 1;
+                entered.Add(p);
             }
+
+            return entered;
 
         }
     }
