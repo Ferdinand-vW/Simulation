@@ -86,7 +86,7 @@ namespace TramSimulator.Events
                     string cs = routes.PRToCentral[routes.PRToCentral.Count - 1].To;
                     if (_arrStation == cs)
                     {
-                        timetable[_tramId].renewTimeTable(timetable[_tramId].totalTime);
+                        
                         newTime += 180;
                         tram.Direction = Routes.Dir.ToPR;
                     }
