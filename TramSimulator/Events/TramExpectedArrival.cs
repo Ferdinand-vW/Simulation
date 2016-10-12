@@ -28,13 +28,13 @@ namespace TramSimulator.Events
             var routes = simState.Routes;
             var timetable = simState.TimeTables;
 
-            double newTime = StartTime + 10;
-            int fillRate = 0;
-            int emptyRate = 0;
+            double newTime = StartTime;
+            // int fillRate = 0;
+            //int emptyRate = 0;
             //Tram has to wait until station is empty
             if (tram.Direction == Routes.Dir.ToPR)
             {
-                if(station.TramIsStationedPR)
+                if (station.TramIsStationedPR)
                 {
                     Console.WriteLine("Tram " + _tramId + " enters the queue to PR");
                     station.WaitingTramsToPR.Enqueue(_tramId);
@@ -46,21 +46,19 @@ namespace TramSimulator.Events
                     tram.State = Tram.TramState.AtStation;
                     tram.Station = _arrStation;
                     string pr = routes.CentralToPR[routes.CentralToPR.Count - 1].To;
-                    if(_arrStation == pr)
+                    if (_arrStation == pr)
                     {
                         timetable[_tramId].renewTimeTable(timetable[_tramId].totalTime);
                         newTime += 180;
                         tram.Direction = Routes.Dir.ToCS;
                     }
 
-                    emptyRate = rates.TramEmptyRate(_arrStation, tram.Direction, tram);
-                    fillRate = rates.TramFillRate(station, tram);
+                    double emptyRate = rates.TramEmptyRate(_arrStation, tram.Direction, StartTime);
+                    int outCount = tram.EmptyTram(emptyRate);
+                    int inCount = tram.FillTram(station.WaitingPersonsToCS);
 
-                    tram.EmptyTram(emptyRate);
-                    tram.FillTram(station.WaitingPersonsToPR, fillRate);
-
-                    //Add emptying and filling time of the tram
-                    newTime += rates.TramEmptyTime(emptyRate) + rates.TramFillTime(fillRate);
+                    //van het interview
+                    newTime += 12.5 + 0.22 * inCount + 0.13 * outCount;
 
                     //Add delay time if doors were shut
                     if (rates.DoorMalfunction()) { newTime += 60; }
@@ -72,7 +70,7 @@ namespace TramSimulator.Events
             }
             else
             {
-                if(station.TramIsStationedCS)
+                if (station.TramIsStationedCS)
                 {
                     Console.WriteLine("Tram " + _tramId + " enters the queue to CS");
                     station.WaitingTramsToCS.Enqueue(_tramId);
@@ -86,19 +84,17 @@ namespace TramSimulator.Events
                     string cs = routes.PRToCentral[routes.PRToCentral.Count - 1].To;
                     if (_arrStation == cs)
                     {
-                        
+
                         newTime += 180;
                         tram.Direction = Routes.Dir.ToPR;
                     }
 
-                    emptyRate = rates.TramEmptyRate(_arrStation, tram.Direction, tram);
-                    fillRate = rates.TramFillRate(station, tram);
+                    double emptyRate = rates.TramEmptyRate(_arrStation, tram.Direction, StartTime);
+                    int outCount = tram.EmptyTram(emptyRate);
+                    int inCount = tram.FillTram(station.WaitingPersonsToCS);
 
-                    tram.EmptyTram(emptyRate);
-                    tram.FillTram(station.WaitingPersonsToCS, fillRate);
-
-                    //Add emptying and filling time of the tram
-                    newTime += rates.TramEmptyTime(emptyRate) + rates.TramFillTime(fillRate);
+                    //van het interview
+                    newTime += 12.5 + 0.22 * inCount + 0.13 * outCount;
 
                     //Add delay time if doors were shut
                     if (rates.DoorMalfunction()) { newTime += 60; }
@@ -107,7 +103,7 @@ namespace TramSimulator.Events
                     simState.EventQueue.AddEvent(e);
                 }
             }
-            
+
         }
 
 
