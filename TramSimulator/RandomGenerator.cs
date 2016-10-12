@@ -32,7 +32,7 @@ namespace TramSimulator
             return Math.Log(1 - Instance.random.NextDouble()) / (-u);
         }
         public static double logNormalWitouthVariance(double mean) {
-            return logNormal(mean * 0.32, mean);
+            return logNormal(mean * 0.5, mean);
         }
 
         public static double logNormal(double variance, double mean)

@@ -84,7 +84,7 @@ namespace TramSimulator
             passengerCountsB.ForEach(x => b.AddPC(x));
 
             Simulation sim = new Simulation(a,b);
-            sim.run(5, null, DayOfWeek.Monday, enterPrognoseA.Keys.ToArray());
+            sim.run(15, null, DayOfWeek.Monday, enterPrognoseA.Keys.ToArray());
 
             Console.ReadLine();
         }
