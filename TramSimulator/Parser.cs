@@ -20,12 +20,12 @@ namespace TramSimulator
                 String line;
                 //sr.ReadLine(); //throw away Top column
                 List<string> stations = parseStations(sr.ReadLine()); //parse column line
-                while ((line = sr.ReadLine()) != null)
+                while((line = sr.ReadLine()) != null)
                 {
                     string[] values = line.Split(new char[] { ';' });
                     string trip = values[0];
 
-                    DateTime date = DateTime.Parse(values[1], new CultureInfo("nl-NL")); //Parse as dd-MM-yyyy
+                    DateTime date = DateTime.Parse(values[1],new CultureInfo("nl-NL")); //Parse as dd-MM-yyyy
                     DateTime time = DateTime.Parse(values[2], new CultureInfo("nl-NL")); //Parse as HH:mm
 
                     List<int> enteringNumbers = values.Skip(3).Take(7).Select(x => Int32.Parse(x)).ToList();
@@ -52,36 +52,9 @@ namespace TramSimulator
             return passengerCounts;
         }
 
-        public static ArtInput ParseArtInput(Stream s)
-        {
-
-            ArtInput input = new ArtInput();
-
-            using (StreamReader sr = new StreamReader(s))
-            {
-                String line;
-                sr.ReadLine(); //throw away Top column
-
-                while ((line = sr.ReadLine()) != null)
-                {
-                    string[] values = line.Split(new char[] { ';' });
-                    string station = values[0];
-                    if (station == "P+R Uithof") { station = "PR"; }
-                    if (station == "Centraal Station Centrumzijde") { station = "CS"; }
-                    int direction = Int32.Parse(values[1]);
-                    int from = Int32.Parse(values[2]);
-                    double to = Double.Parse(values[3]);
-                    double passIn = Double.Parse(values[4]);
-                    double passOut = Double.Parse(values[5]);
-                    input.addInput(station, direction, from, to, passIn, passOut);
-                }
-                return input;
-            }
-        }
-
         private static List<string> parseStations(string line)
         {
-            String[] columns = line.Split(new char[] { ';' });
+            String[] columns = line.Split(new char []{ ';' });
             return columns.Skip(3).Take(9).ToList(); //Throw away Trip/Date/Depart and no need for duplicate stations
         }
     }
