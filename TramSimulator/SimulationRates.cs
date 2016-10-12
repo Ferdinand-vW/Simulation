@@ -31,10 +31,9 @@ namespace TramSimulator
 
             return distNextEvent;
         }
-        public bool nonZeroPercentage(double time, string station, Routes.Dir dir)
-        {
-            return Routes.ToCS(dir) ? 0 != a.EnteringFQ(day, station, time)
-                                          : 0 != b.EnteringFQ(day, station, time);
+        public bool nonZeroPercentage(double time, string station, Routes.Dir dir) {
+            return Routes.ToCS(dir) ? 0 == a.EnteringFQ(day, station, time) 
+                                          : 0 == b.EnteringFQ(day, station, time);
         }
 
         public double TramArrivalRate(string depStation, string arrStation)
@@ -84,38 +83,30 @@ namespace TramSimulator
             return Generate.uniform(0, 5) == 0;
         }
 
-        public double TramEmptyRate(string station, Routes.Dir dir, double time)
+        public int TramEmptyRate(string station, Routes.Dir dir, Tram tram)
         {
-            return Routes.ToCS(dir) ? a.DepartPercentage(station) : b.DepartPercentage(station);
+            double fillRatio = tram.PersonsOnTram.Count / Tram.CAPACITY;
+            //number of people that leave the tram
+            return (int)(Routes.ToCS(dir) ? a.DepartPercentage(station) * fillRatio
+                                          : b.DepartPercentage(station) * fillRatio);
         }
 
+        public double TramEmptyTime(int npss)
+        {
+            return (npss / Tram.CAPACITY) * 60;
+        }
 
-        //Fill rate lijkt mij raar want iedereen wilt gewoon mee met de tram
+        public int TramFillRate(Station station, Tram tram)
+        {
+            var waitingPersons = Routes.ToCS(tram.Direction) ? station.WaitingPersonsToPR
+                                                             : station.WaitingPersonsToCS;
+            return Math.Min(Tram.CAPACITY - tram.PersonsOnTram.Count, waitingPersons.Count);
+        }
 
-        //public int TramEmptyRate(string station, Routes.Dir dir, Tram tram)
-        //{
-        //    double fillRatio = tram.PersonsOnTram.Count / Tram.CAPACITY;
-        //    //number of people that leave the tram
-        //    return (int)(Routes.ToCS(dir) ? a.DepartPercentage(station) * fillRatio
-        //                                  : b.DepartPercentage(station) * fillRatio);
-        //}
-
-        //public double TramEmptyTime(int npss)
-        //{
-        //    return (npss / Tram.CAPACITY) * 60;
-        //}
-
-        //public int TramFillRate(Station station, Tram tram)
-        //{
-        //    var waitingPersons = Routes.ToCS(tram.Direction) ? station.WaitingPersonsToPR
-        //                                                     : station.WaitingPersonsToCS;
-        //    return Math.Min(Tram.CAPACITY - tram.PersonsOnTram.Count, waitingPersons.Count);
-        //}
-
-        //public double TramFillTime(int npss)
-        //{
-        //    return (npss / Tram.CAPACITY) * 60;
-        //}
+        public double TramFillTime(int npss)
+        {
+            return (npss / Tram.CAPACITY) * 60;
+        }
 
 
     }

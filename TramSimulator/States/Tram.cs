@@ -30,29 +30,25 @@ namespace TramSimulator.States
             this.Direction = Routes.Dir.ToCS;
 
         }
-        public int EmptyTram(double emptyRate)
+        public void EmptyTram(double emptyRate)
         {
-            int n = 0;
-            for (int i = 0; i < PersonsOnTram.Count; i++)
+            int i = (int)(PersonsOnTram.Count * emptyRate);
+            for (int j = 0; j < i; j++)
             {
-                if (Generate.uniform(0, 1) <= emptyRate)
-                {
-                    n++;
-                    PersonsOnTram.RemoveAt(i);
-                }
+                PersonsOnTram.RemoveAt((int)Generate.uniform(0, PersonsOnTram.Count - 1));
             }
-            return n;
         }
-        public int FillTram(Queue<Person> waitingPersons)
+        public void FillTram(Queue<Person> waitingPersons, double fillRate)
         {
-            int n = 0;
-            while (PersonsOnTram.Count < CAPACITY && waitingPersons.Count > 0)
+            //The fillrate should never be higher than the number of waiting persons at a station
+            //If that happens anyway, then we are okay with getting an exception
+            while (PersonsOnTram.Count < CAPACITY && fillRate > 0 && waitingPersons.Count > 0)
             {
-                n++;
                 Person p = waitingPersons.Dequeue();
                 PersonsOnTram.Add(p);
+                fillRate -= 1;
             }
-            return n;
+
         }
     }
 }
