@@ -86,7 +86,7 @@ namespace TramSimulator
             Console.WriteLine("Finished reading passengercount data");
             Console.WriteLine("Start simulation");
             Simulation sim = new Simulation(a,b);
-            var results = sim.run(5, null, DayOfWeek.Monday, enterPrognoseA.Keys.ToArray());
+            var results = sim.run(false, 5, null, DayOfWeek.Monday, enterPrognoseA.Keys.ToArray());
 
             var trams = results.TimeTables.Values.ToList();
             var persons = results.Persons.Values.ToList();
