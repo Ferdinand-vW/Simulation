@@ -10,9 +10,13 @@ namespace TramSimulator
     {
         Dictionary<string, StationArtInput> PRCS;
         Dictionary<string, StationArtInput> CSPR;
+        string[] stationsPRCS;
+        string[] stationsCSPR;
 
-        public ArtInput()
+        public ArtInput(string[] stations)
         {
+            stationsPRCS = stations;
+            stationsCSPR = stations.Reverse().ToArray();
             PRCS = new Dictionary<string, StationArtInput>();
             CSPR = new Dictionary<string, StationArtInput>();
         }
@@ -31,18 +35,64 @@ namespace TramSimulator
                 CSPR[station].addInput(from, to, passIn, passOut);
             }
         }
-
-        public void print()
+        public double avgInPerHour(string station, double time, Routes.Dir dir)
         {
-            foreach (var kvp in PRCS)
+            if (dir == Routes.Dir.ToPR)
             {
-                Console.WriteLine(kvp.Key);
-                kvp.Value.print();
+                return CSPR[station].avgInPerHour(time);
             }
-            foreach (var kvp in CSPR)
+            else {
+                return PRCS[station].avgInPerHour(time);
+            }
+        }
+        public double departPercentage(string station, double time, Routes.Dir dir)
+        {
+            if (dir == Routes.Dir.ToPR)
             {
-                Console.WriteLine(kvp.Key);
-                kvp.Value.print();
+                double numberOnTrain = onTrain(station, time, dir);
+                //If no one is on the train, Everybody gets out. 
+                return numberOnTrain == 0 ? 1 : CSPR[station].passOut(time) / numberOnTrain;
+            }
+
+            else {
+                double numberOnTrain = onTrain(station, time, dir);
+                return numberOnTrain == 0 ? 1 : PRCS[station].passOut(time) / numberOnTrain;
+            }
+
+        }
+
+        // Calculates how many persons are on the tram at a given station at a given time
+        public double onTrain(string station, double time, Routes.Dir dir)
+        {
+            if (dir == Routes.Dir.ToPR)
+            {
+                int index = Array.IndexOf(stationsCSPR, station);
+                if (index == 0) return 0;
+                else {
+                    string prevStation = stationsCSPR[index - 1];
+                    // The amount of people got off and on the tram at the previous station
+                    double extraPersons = (CSPR[prevStation].passOut(time) + CSPR[prevStation].passIn(time));
+                    // The amount of people on the train is calculated 
+                    //with the amout of people where on the train at the previous station
+                    return extraPersons + (onTrain(prevStation, time, dir));
+                }
+            }
+            else {
+                int index = Array.IndexOf(stationsPRCS, station);
+                if (index == 0) return 0;
+                else {
+                    string prevStation = stationsPRCS[index - 1];
+                    double extraPersons = (PRCS[prevStation].passOut(time) + PRCS[prevStation].passIn(time));
+                    return extraPersons + (onTrain(prevStation, time, dir));
+                }
+            }
+        }
+
+        public void print(double time, Routes.Dir dir)
+        {
+            foreach (string s in stationsCSPR)
+            {
+                Console.WriteLine("{0}: {1}", s, departPercentage(s, time, dir));
             }
         }
 
@@ -71,24 +121,26 @@ namespace TramSimulator
                 return (double)passIns[from] / (double)(fromTo[from] - from);
 
             }
-
-            public double avgOutPerHour(double StartTime)
+            public double passOut(double time)
             {
-                int from = timeToFrom(StartTime);
-                return (double)passOuts[from] / (double)(fromTo[from] - from);
+                return passOuts[timeToFrom(time)];
+            }
+            public double passIn(double time)
+            {
+                return passIns[timeToFrom(time)];
             }
 
 
-            public int timeToFrom(double StartTime)
-            {
-                int from;
-                if (StartTime > 18 * 60 * 60) { from = 18; }
-                else if (StartTime > 16 * 60 * 60) { from = 16; }
-                else if (StartTime > 9 * 60 * 60) { from = 9; }
-                else if (StartTime > 7 * 60 * 60) { from = 7; }
-                else { from = 6; }
 
-                return from;
+            public int timeToFrom(double time)
+            {
+                foreach (var kvp in fromTo)
+                {
+                    if (kvp.Key * 60 * 60 <= time && time < kvp.Value * 60 * 60)
+                    { return kvp.Key; }
+                }
+
+                throw new Exception("Invalid time voor Artificeele input");
             }
 
             public void print()

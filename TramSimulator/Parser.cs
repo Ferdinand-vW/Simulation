@@ -52,10 +52,10 @@ namespace TramSimulator
             return passengerCounts;
         }
 
-        public static ArtInput ParseArtInput(Stream s)
+        public static ArtInput ParseArtInput(Stream s,string[] stations)
         {
 
-            ArtInput input = new ArtInput();
+            ArtInput input = new ArtInput(stations);
 
             using (StreamReader sr = new StreamReader(s))
             {
