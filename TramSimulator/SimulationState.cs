@@ -18,10 +18,11 @@ namespace TramSimulator
         public Routes Routes { get; set; }
         public SimulationRates Rates {get;set;}
         public Dictionary<int, TimeTable> TimeTables { get; set; }
+        public DayOfWeek Day { get; set; }
 
         public SimulationState(Dictionary<int, Tram> trams, Dictionary<string, Station> stations, 
                                EventQueue eventQueue, Routes routes, SimulationRates rates, 
-                               Dictionary<int, TimeTable> timeTables)
+                               Dictionary<int, TimeTable> timeTables, DayOfWeek day)
         {
             this.Trams = trams;
             this.Stations = stations;
@@ -30,6 +31,7 @@ namespace TramSimulator
             this.Routes = routes;
             this.Rates = rates;
             this.TimeTables = timeTables;
+            this.Day = day;
         }
     }
 }

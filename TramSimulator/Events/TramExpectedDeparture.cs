@@ -77,7 +77,7 @@ namespace TramSimulator.Events
 
             if(Routes.ToCS(tram.Direction))
             {
-                Console.WriteLine("Trams waiting to at " + _depStation + " to CS: " + station.WaitingTramsToCS.Count);
+                //Console.WriteLine("Trams waiting to at " + _depStation + " to CS: " + station.WaitingTramsToCS.Count);
                 //if there was a tram waiting create an arrival event
                 if (Station.IsEndStation(_depStation))
                 {
@@ -105,7 +105,7 @@ namespace TramSimulator.Events
             }
             else
             {
-                Console.WriteLine("Trams waiting to PR: " + station.WaitingTramsToPR.Count);
+                //Console.WriteLine("Trams waiting to PR: " + station.WaitingTramsToPR.Count);
                 //if there was a tram waiting create an arrival event
                 if(Station.IsEndStation(_depStation))
                 {

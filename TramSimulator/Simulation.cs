@@ -102,7 +102,7 @@ namespace TramSimulator
 
 
                 e.execute(simState);
-                Console.WriteLine("Event " + n + ": " + e.ToString());
+                //Console.WriteLine("Event " + n + ": " + e.ToString());
                 n++;
             }
 
@@ -149,7 +149,7 @@ namespace TramSimulator
             var timeTables = new Dictionary<int, TimeTable>();
 
 
-            return new SimulationState(trams, stations, eventQueue, routes, rates, timeTables);
+            return new SimulationState(trams, stations, eventQueue, routes, rates, timeTables, day);
         }
 
         static public List<Track> GenerateRoute(string[] stationNames)

@@ -31,15 +31,15 @@ namespace TramSimulator.Events
 
             double newTime = StartTime + 10;
             int fillRate = 0;
-            int emptyRate = 0;
+            double emptyRate = 0;
             //Tram has to wait until station is empty
             if (tram.Direction == Routes.Dir.ToPR)
             {
                 if(station.TramIsStationedPR)
                 {
-                    Console.WriteLine("Tram " + _tramId + " enters the queue to PR");
+                    //Console.WriteLine("Tram " + _tramId + " enters the queue to PR");
                     station.WaitingTramsToPR.Enqueue(_tramId);
-                    Console.WriteLine(station.WaitingTramsToPR.Count);
+                    //Console.WriteLine(station.WaitingTramsToPR.Count);
                 }
                 else
                 {
@@ -54,18 +54,25 @@ namespace TramSimulator.Events
                         tram.Direction = Routes.Dir.ToCS;
                     }
 
-                    emptyRate = rates.TramEmptyRate(_arrStation, tram.Direction, tram);
+                    emptyRate = rates.TramEmptyRate(simState.Day, _arrStation, tram.Direction, tram, StartTime);
                     fillRate = rates.TramFillRate(station, tram);
 
                     var pplExited = tram.EmptyTram(emptyRate);
                     var pplEntered = tram.FillTram(station.WaitingPersonsToPR, fillRate);
                     //update waiting times
-                    pplEntered.ForEach(x => persons[x].SetWaitingTime(StartTime));
-                    simState.Persons.Values.ToList().Where(x => station.WaitingPersonsToPR.Contains(x.PersonId)).ToList()
-                                                    .ForEach(x => Console.WriteLine("Person: " + x.ArrivalTime + " " + x.WaitingTime + " " + StartTime));
+                    pplEntered.ForEach(x => 
+                    {
+                        persons[x].SetWaitingTime(StartTime);
+                        persons[x].ArrivedAt = _arrStation;
+                    });
+                    pplExited.ForEach(x => 
+                    {
+                        persons[x].LeaveTime = StartTime;
+                        persons[x].LeftAt = _arrStation;
+                    });
 
                     //Add emptying and filling time of the tram
-                    newTime += rates.TramEmptyTime(pplExited) + rates.TramFillTime(fillRate);
+                    newTime += rates.TramEmptyTime(pplExited.Count) + rates.TramFillTime(fillRate);
 
                     //Add delay time if doors were shut
                     if (rates.DoorMalfunction()) { newTime += 60; }
@@ -79,9 +86,9 @@ namespace TramSimulator.Events
             {
                 if(station.TramIsStationedCS)
                 {
-                    Console.WriteLine("Tram " + _tramId + " enters the queue to CS");
+                    //Console.WriteLine("Tram " + _tramId + " enters the queue to CS");
                     station.WaitingTramsToCS.Enqueue(_tramId);
-                    Console.WriteLine(station.WaitingTramsToCS.Count);
+                    //Console.WriteLine(station.WaitingTramsToCS.Count);
                 }
                 else
                 {
@@ -96,17 +103,26 @@ namespace TramSimulator.Events
                         tram.Direction = Routes.Dir.ToPR;
                     }
 
-                    emptyRate = rates.TramEmptyRate(_arrStation, tram.Direction, tram);
+                    emptyRate = rates.TramEmptyRate(simState.Day, _arrStation, tram.Direction, tram, StartTime);
                     fillRate = rates.TramFillRate(station, tram);
                   
-                    int psLeft = tram.EmptyTram(emptyRate);
+                    var pplExited = tram.EmptyTram(emptyRate);
                     var pplEntered = tram.FillTram(station.WaitingPersonsToCS, fillRate);
-                    pplEntered.ForEach(x => persons[x].SetWaitingTime(StartTime));
-                    simState.Persons.Values.ToList().Where(x => station.WaitingPersonsToCS.Contains(x.PersonId)).ToList()
-                                                    .ForEach(x => Console.WriteLine("Person: " + x.ArrivalTime + " " + x.WaitingTime + " " + StartTime));
+                    //Determine waiting time for people who just entered the tram
+                    pplEntered.ForEach(x => 
+                    {
+                        persons[x].SetWaitingTime(StartTime);
+                        persons[x].ArrivedAt = _arrStation;
+                    });
+                    //Determine time that a person left the tram and at which station he did
+                    pplExited.ForEach(x =>
+                    {
+                        persons[x].LeaveTime = StartTime;
+                        persons[x].LeftAt = _arrStation;
+                    });
 
                     //Add emptying and filling time of the tram
-                    newTime += rates.TramEmptyTime(psLeft) + rates.TramFillTime(fillRate);
+                    newTime += rates.TramEmptyTime(pplExited.Count) + rates.TramFillTime(fillRate);
 
                     //Add delay time if doors were shut
                     if (rates.DoorMalfunction()) { newTime += 60; }

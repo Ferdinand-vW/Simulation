@@ -1,5 +1,5 @@
 ﻿//Ferdinand van Walree, 3874389
-//Rogier Wuijts 
+//Rogier Wuijts, 
 
 using System;
 using System.Collections.Generic;
@@ -18,8 +18,8 @@ namespace TramSimulator
         static void Main(string[] args)
         {
             Console.WriteLine("Start reading passengercount data..");
-            String patha = @"..\..\..\a_data_updated.csv";
-            String pathb = @"..\..\..\b_data_updated.csv";
+            String patha = @"../a_data_updated.csv";
+            String pathb = @"../b_data_updated.csv";
 
             Stream streama = File.Open(patha, FileMode.Open);
             Stream streamb = File.Open(pathb, FileMode.Open);
@@ -33,6 +33,8 @@ namespace TramSimulator
             threadB.Start();
             threadA.Join();
             threadB.Join();
+
+            Func<double,double,double> div = (x, y) => x / y;
 
             Dictionary<string, double> enterPrognoseA = new Dictionary<string, double>();
             Dictionary<string, double> enterPrognoseB = new Dictionary<string, double>();
@@ -52,11 +54,11 @@ namespace TramSimulator
             exitPrognoseA["WKZ"] = 0;
             exitPrognoseA["UMC"] = 0;
             exitPrognoseA["Heidelberglaan"] = 0;
-            exitPrognoseA["Padualaan"] = 236 / 12827;
-            exitPrognoseA["Kromme Rijn"] = 31 / 19446;
-            exitPrognoseA["Galgenwaard"] = 265 / 20106;
-            exitPrognoseA["Vaartscherijn"] = 544 / 20447;
-            exitPrognoseA["CS"] = 21164 / 21164;
+            exitPrognoseA["Padualaan"] = div(236,12827);
+            exitPrognoseA["Kromme Rijn"] = div(31,19446);
+            exitPrognoseA["Galgenwaard"] = div(265,20106);
+            exitPrognoseA["Vaartscherijn"] = div(544,20447);
+            exitPrognoseA["CS"] = div(21164,21164);
 
             enterPrognoseB["CS"] = 19994;
             enterPrognoseB["Vaartscherijn"] = 2337;
@@ -69,13 +71,13 @@ namespace TramSimulator
             enterPrognoseB["PR"] = 0;
 
             exitPrognoseB["CS"] = 0;
-            exitPrognoseB["Vaartscherijn"] = 1735 / 19994;
-            exitPrognoseB["Galgenwaard"] = 1288 / 20596;
-            exitPrognoseB["Kromme Rijn"] = 1039 / 19667;
-            exitPrognoseB["Padualaan"] = 9672 / 18674;
-            exitPrognoseB["Heidelberglaan"] = 5789 / 9011;
-            exitPrognoseB["UMC"] = 2577 / 3230;
-            exitPrognoseB["WKZ"] = 644 / 659;
+            exitPrognoseB["Vaartscherijn"] = div(1735,19994);
+            exitPrognoseB["Galgenwaard"] = div(1288,20596);
+            exitPrognoseB["Kromme Rijn"] = div(1039,19667);
+            exitPrognoseB["Padualaan"] = div(9672,18674);
+            exitPrognoseB["Heidelberglaan"] = div(5789,9011);
+            exitPrognoseB["UMC"] = div(2577,3230);
+            exitPrognoseB["WKZ"] = div(644,659);
             exitPrognoseB["PR"] = 1;
 
             Data a = new Data(enterPrognoseA, exitPrognoseA);
@@ -103,11 +105,19 @@ namespace TramSimulator
             //Average waiting time of a person
             Console.Write("Average waiting time: ");
             Console.WriteLine(persons.Sum(x => x.WaitingTime) / persons.Count);
-
+            //Maximum travel time of a person
+            Console.Write("Maximum travel time of a person: ");
+            Console.WriteLine(persons.Max(x => x.LeaveTime - x.ArrivalTime));
+            //Average travel time of a person
+            Console.Write("Average travel time of a person: ");
+            Console.WriteLine(persons.Sum(x => x.LeaveTime - x.ArrivalTime) / persons.Count);
+            
+            //Number of people that never left or got on a tram. Also the reason why the above
+            //statistic is negative. TODO: figure out why there are so many passengers that never get on
+            //or leave a tram
+            Console.WriteLine(persons.Where(x => x.LeaveTime == 0).ToList().Count);
 
             Console.ReadLine();
         }
-
-
     }
 }

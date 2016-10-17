@@ -83,17 +83,17 @@ namespace TramSimulator
             return Generate.uniform(0, 5) == 0;
         }
 
-        public int TramEmptyRate(string station, Routes.Dir dir, Tram tram)
+        public double TramEmptyRate(DayOfWeek day, string station, Routes.Dir dir, Tram tram, double time)
         {
-            double fillRatio = tram.PersonsOnTram.Count / Tram.CAPACITY;
+            double fillRatio = (double)tram.PersonsOnTram.Count / (double)Tram.CAPACITY;
             //Percentage of people that leave the tram
-            return (int)(Routes.ToCS(dir) ? a.DepartPercentage(station) * fillRatio
-                                          : b.DepartPercentage(station) * fillRatio);
+            return (Routes.ToCS(dir) ? a.DepartPercentage(station)
+                                     : b.DepartPercentage(station));
         }
 
         public double TramEmptyTime(int npss)
         {
-            return (npss / Tram.CAPACITY) * 60;
+            return ((double)npss / (double)Tram.CAPACITY) * 60;
         }
 
         public int TramFillRate(Station station, Tram tram)
@@ -105,7 +105,7 @@ namespace TramSimulator
 
         public double TramFillTime(int npss)
         {
-            return (npss / Tram.CAPACITY) * 60;
+            return ((double)npss / (double)Tram.CAPACITY) * 60;
         }
 
 

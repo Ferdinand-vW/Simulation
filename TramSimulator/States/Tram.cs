@@ -30,12 +30,15 @@ namespace TramSimulator.States
             this.Direction = Routes.Dir.ToCS;
 
         }
-        public int EmptyTram(double emptyRate)
+        public List<int> EmptyTram(double emptyRate)
         {
             int count = PersonsOnTram.Count;
-            PersonsOnTram = PersonsOnTram.Where(x => Generate.uniform(0, 1) >= emptyRate).ToList();
+            //Should be more random, but keeping it static for debugging purposes
+            int numLeave = (int)((double)PersonsOnTram.Count * emptyRate);
+            var personsLeaving = PersonsOnTram.Take(numLeave).ToList();
+            PersonsOnTram = PersonsOnTram.Skip(numLeave).ToList();
 
-            return count - PersonsOnTram.Count;
+            return personsLeaving;
         }
         public List<int> FillTram(Queue<int> waitingPersons, double fillRate)
         {

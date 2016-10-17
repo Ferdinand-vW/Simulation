@@ -11,6 +11,9 @@ namespace TramSimulator.States
         public int PersonId { get; private set; }
         public double ArrivalTime { get; }
         public double WaitingTime { get; private set; }
+        public double LeaveTime { get; set; }
+        public string ArrivedAt { get; set; }
+        public string LeftAt { get; set; }
 
         public Person(int pId, double arrivalTime)
         {
