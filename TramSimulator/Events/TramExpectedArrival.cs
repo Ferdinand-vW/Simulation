@@ -50,8 +50,22 @@ namespace TramSimulator.Events
                     if(_arrStation == pr)
                     {
                         timetable[_tramId].renewTimeTable(timetable[_tramId].totalTime);
-                        newTime += 180;
-                        tram.Direction = Routes.Dir.ToCS;
+                        newTime += 90;
+                        emptyRate = rates.TramEmptyRate(simState.Day, _arrStation, tram.Direction, tram, StartTime);
+
+                        var exited = tram.EmptyTram(emptyRate);
+                        //Determine waiting time for people who just entered the tram
+                        //Determine time that a person left the tram and at which station he did
+                        exited.ForEach(x =>
+                        {
+                            persons[x].LeaveTime = StartTime;
+                            persons[x].LeftAt = _arrStation;
+                        });
+
+                        //Add emptying and filling time of the tram
+                        newTime += rates.TramEmptyTime(exited.Count);
+                        simState.EventQueue.AddEvent(new TurnAroundFree(_tramId, newTime, _arrStation));
+                        return;
                     }
 
                     emptyRate = rates.TramEmptyRate(simState.Day, _arrStation, tram.Direction, tram, StartTime);
@@ -98,9 +112,22 @@ namespace TramSimulator.Events
                     string cs = routes.PRToCentral[routes.PRToCentral.Count - 1].To;
                     if (_arrStation == cs)
                     {
-                        
-                        newTime += 180;
-                        tram.Direction = Routes.Dir.ToPR;
+                        newTime += 90;
+                        emptyRate = rates.TramEmptyRate(simState.Day, _arrStation, tram.Direction, tram, StartTime);
+
+                        var exited = tram.EmptyTram(emptyRate);
+                        //Determine waiting time for people who just entered the tram
+                        //Determine time that a person left the tram and at which station he did
+                        exited.ForEach(x =>
+                        {
+                            persons[x].LeaveTime = StartTime;
+                            persons[x].LeftAt = _arrStation;
+                        });
+
+                        //Add emptying and filling time of the tram
+                        newTime += rates.TramEmptyTime(exited.Count);
+                        simState.EventQueue.AddEvent(new TurnAroundFree(_tramId, newTime, _arrStation));
+                        return;
                     }
 
                     emptyRate = rates.TramEmptyRate(simState.Day, _arrStation, tram.Direction, tram, StartTime);

@@ -68,69 +68,35 @@ namespace TramSimulator.Events
             var arrTime = StartTime + simState.Rates.TramArrivalRate(_depStation, nextStation);
 
             //update timeTable
-            simState.TimeTables[_tramId].update(StartTime,_depStation);
+            simState.TimeTables[_tramId].update(StartTime, _depStation);
 
             //Handle departure of a tram
             tram.State = Tram.TramState.OnTrack;
             eventQueue.AddEvent(new TramExpectedArrival(_tramId, arrTime, nextStation));
             simState.Routes.MoveToNextTrack(_tramId, _depStation);
 
-            if(Routes.ToCS(tram.Direction))
+            if (Routes.ToCS(tram.Direction))
             {
                 //Console.WriteLine("Trams waiting to at " + _depStation + " to CS: " + station.WaitingTramsToCS.Count);
                 //if there was a tram waiting create an arrival event
-                if (Station.IsEndStation(_depStation))
-                {
-                    //A tram can be parked at either sides of the endstation
-                    if (station.TramIsStationedCS) { station.TramIsStationedCS = false; }
-                    else if (station.TramIsStationedPR) { station.TramIsStationedPR = false; }
 
-                    if(station.WaitingTramsToPR.Count > 0)
-                    {
-                        //In this case the train has reached an endstation and has already turned around.
-                        //Trams that are waiting were heading for this station
-                        var wTramId = station.WaitingTramsToPR.Dequeue();
-                        eventQueue.AddEvent(new TramExpectedArrival(wTramId, StartTime, _depStation));
-                    }
-                }
-                else
+                station.TramIsStationedCS = false;
+                if (station.WaitingTramsToCS.Count > 0)
                 {
-                    station.TramIsStationedCS = false;
-                    if(station.WaitingTramsToCS.Count > 0)
-                    {
-                        var wTramId = station.WaitingTramsToCS.Dequeue();
-                        eventQueue.AddEvent(new TramExpectedArrival(wTramId, StartTime, _depStation));
-                    }
+                    var wTramId = station.WaitingTramsToCS.Dequeue();
+                    eventQueue.AddEvent(new TramExpectedArrival(wTramId, StartTime, _depStation));
                 }
             }
             else
             {
-                //Console.WriteLine("Trams waiting to PR: " + station.WaitingTramsToPR.Count);
-                //if there was a tram waiting create an arrival event
-                if(Station.IsEndStation(_depStation))
+                station.TramIsStationedPR = false;
+                if (station.WaitingTramsToPR.Count > 0)
                 {
-                    //A tram can be parked at either sides of the endstation
-                    if(station.TramIsStationedCS) { station.TramIsStationedCS = false; }
-                    else if(station.TramIsStationedPR) { station.TramIsStationedPR = false; }
-
-                    if(station.WaitingTramsToCS.Count > 0)
-                    {
-                        //Same as above, but for the other endstation
-                        var wTramId = station.WaitingTramsToCS.Dequeue();
-                        eventQueue.AddEvent(new TramExpectedArrival(wTramId, StartTime, _depStation));
-                    }
-                }
-                else
-                {
-                    station.TramIsStationedPR = false;
-                    if (station.WaitingTramsToPR.Count > 0)
-                    {
-                        var wTramId = station.WaitingTramsToPR.Dequeue();
-                        eventQueue.AddEvent(new TramExpectedArrival(wTramId, StartTime, _depStation));
-                    }  
+                    var wTramId = station.WaitingTramsToPR.Dequeue();
+                    eventQueue.AddEvent(new TramExpectedArrival(wTramId, StartTime, _depStation));
                 }
             }
-            
+
         }
 
         public override string ToString()

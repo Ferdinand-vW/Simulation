@@ -98,7 +98,7 @@ namespace TramSimulator
                 Event e = simState.EventQueue.Next();
 
                 //At 9PM we shut down the simulation
-                if(e.StartTime > 15 * 60 * 60) { break; }
+                if(e.StartTime > 22 * 60 * 60) { break; }
 
 
                 e.execute(simState);
@@ -132,14 +132,19 @@ namespace TramSimulator
                 }
             }
 
+            double minutesPerTram = (double)60 / tramFrequency;
+            double totalRunTime = (17 + 17 + 4 + 4);
+            int numberOfTrams = (int)(totalRunTime / minutesPerTram);
             var trams = new Dictionary<int, Tram>();
-            for (int i = 0; i < tramFrequency; i++)
+            Console.WriteLine("number of trams: {0}", numberOfTrams);
+            for (int i = 0; i < numberOfTrams; i++)
             {
-                trams[i] = new Tram(i,0);
+                trams[i] = new Tram(i, 0);
                 trams[i].Station = stationNames[0];
                 trams[i].State = Tram.TramState.AtShuntyard;
-                eventQueue.AddEvent(new EnterTrack(i, startTime + (i * 60), stations.Values.ToArray()[0].Name));
+                eventQueue.AddEvent(new EnterTrack(i, startTime - (60 * 60) + (i * minutesPerTram * 60), stations.Values.ToArray()[0].Name));
             }
+
 
             var prToCentral = GenerateRoute(stationNames);
             var centralToPR = GenerateRoute(stationNames.Reverse().ToArray());
