@@ -17,7 +17,8 @@ namespace TramSimulator.States
         public Queue<int> WaitingTramsToCS { get; set; }
         public bool TramIsStationedPR { get; set; }
         public bool TramIsStationedCS { get; set; }
-
+        public int lastTramPR { get; set; }
+        public int lastTramCS { get; set; }
         public Station(String name)
         {
             this._name = name;
@@ -27,6 +28,8 @@ namespace TramSimulator.States
             this.WaitingTramsToCS = new Queue<int>();
             this.TramIsStationedPR = false;
             this.TramIsStationedCS = false;
+            lastTramCS = -1;
+            lastTramPR = -1;
         }
 
         public static bool IsEndStation(string name)

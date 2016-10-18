@@ -79,7 +79,7 @@ namespace TramSimulator.Events
             {
                 //Console.WriteLine("Trams waiting to at " + _depStation + " to CS: " + station.WaitingTramsToCS.Count);
                 //if there was a tram waiting create an arrival event
-
+                station.lastTramCS = _tramId;
                 station.TramIsStationedCS = false;
                 if (station.WaitingTramsToCS.Count > 0)
                 {
@@ -89,6 +89,7 @@ namespace TramSimulator.Events
             }
             else
             {
+                station.lastTramPR = _tramId;
                 station.TramIsStationedPR = false;
                 if (station.WaitingTramsToPR.Count > 0)
                 {

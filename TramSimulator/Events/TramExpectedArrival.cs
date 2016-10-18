@@ -28,6 +28,7 @@ namespace TramSimulator.Events
             var rates = simState.Rates;
             var routes = simState.Routes;
             var timetable = simState.TimeTables;
+            int nextTram = _tramId > 0? _tramId - 1 : simState.Trams.Count-1;
 
             double newTime = StartTime + 10;
             int fillRate = 0;
@@ -35,7 +36,7 @@ namespace TramSimulator.Events
             //Tram has to wait until station is empty
             if (tram.Direction == Routes.Dir.ToPR)
             {
-                if(station.TramIsStationedPR)
+                if(station.TramIsStationedPR || (station.lastTramPR != nextTram && station.lastTramPR != -1))
                 {
                     //Console.WriteLine("Tram " + _tramId + " enters the queue to PR");
                     station.WaitingTramsToPR.Enqueue(_tramId);
@@ -98,7 +99,7 @@ namespace TramSimulator.Events
             }
             else
             {
-                if(station.TramIsStationedCS)
+                if(station.TramIsStationedCS || (station.lastTramCS != nextTram && station.lastTramCS != -1))
                 {
                     //Console.WriteLine("Tram " + _tramId + " enters the queue to CS");
                     station.WaitingTramsToCS.Enqueue(_tramId);
