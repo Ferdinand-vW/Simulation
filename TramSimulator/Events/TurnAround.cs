@@ -27,7 +27,23 @@ namespace TramSimulator.Events
             tram.Direction = TurnDirection(tram.Direction);
             tram.State = Tram.TramState.AtStation;
             tram.Station = _arrStation;
+            var persons = simState.Persons;
+            var rates = simState.Rates;
+
             GenerateEventForWaitingTram(simState);
+
+
+            var fillRate = rates.TramFillRate(station, tram);
+            var waitingppl = Routes.ToPR(tram.Direction) ? station.WaitingPersonsToPR : station.WaitingPersonsToCS;
+            var pplEntered = tram.FillTram(waitingppl, fillRate);
+            //update waiting times
+            pplEntered.ForEach(x =>
+            {
+                persons[x].SetWaitingTime(StartTime);
+                persons[x].ArrivedAt = _arrStation;
+            });
+            //Add emptying and filling time of the tram
+            newTime += rates.TramFillTime(fillRate);
 
             simState.EventQueue.AddEvent(new TramExpectedDeparture(_tramId, _arrStation, newTime));
         }

@@ -56,7 +56,7 @@ namespace TramSimulator.Events
                 fillRate = rates.TramFillRate(station, tram);
 
                 var pplExited = tram.EmptyTram(emptyRate);
-                var waitingppl = _arrStation == "PR" ? station.WaitingPersonsToPR : station.WaitingPersonsToCS;
+                var waitingppl = Routes.ToPR(tram.Direction) ? station.WaitingPersonsToPR : station.WaitingPersonsToCS;
                 var pplEntered = tram.FillTram(waitingppl, fillRate);
                 //update waiting times
                 pplEntered.ForEach(x =>
@@ -91,8 +91,10 @@ namespace TramSimulator.Events
 
             double newTime = StartTime + 10;
             double emptyRate = 0;
-
-            timetable[_tramId].renewTimeTable(timetable[_tramId].totalTime);
+            if (_arrStation == "PR")
+            {
+                timetable[_tramId].renewTimeTable(timetable[_tramId].totalTime);
+            }
             emptyRate = rates.TramEmptyRate(simState.Day, _arrStation, tram.Direction, tram, StartTime);
 
             var exited = tram.EmptyTram(emptyRate);
