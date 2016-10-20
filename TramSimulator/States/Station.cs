@@ -16,9 +16,12 @@ namespace TramSimulator.States
         public Queue<int> WaitingTramsToPR { get; set; }
         public Queue<int> WaitingTramsToCS { get; set; }
         public bool TramIsStationedPR { get; set; }
+        public int? TramAtPR { get; set; }
         public bool TramIsStationedCS { get; set; }
+        public int? TramAtCS { get; set; }
         public int lastTramPR { get; set; }
         public int lastTramCS { get; set; }
+
         public Station(String name)
         {
             this._name = name;

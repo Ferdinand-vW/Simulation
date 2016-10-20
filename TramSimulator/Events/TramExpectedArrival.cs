@@ -33,136 +33,89 @@ namespace TramSimulator.Events
             double newTime = StartTime + 10;
             int fillRate = 0;
             double emptyRate = 0;
-            //Tram has to wait until station is empty
-            if (tram.Direction == Routes.Dir.ToPR)
+
+            if(_arrStation == "PR" || _arrStation == "CS")
             {
-                if(station.TramIsStationedPR || (station.lastTramPR != nextTram && station.lastTramPR != -1))
-                {
-                    //Console.WriteLine("Tram " + _tramId + " enters the queue to PR");
-                    station.WaitingTramsToPR.Enqueue(_tramId);
-                    //Console.WriteLine(station.WaitingTramsToPR.Count);
-                }
-                else
-                {
-                    station.TramIsStationedPR = true;
-                    tram.State = Tram.TramState.AtStation;
-                    tram.Station = _arrStation;
-                    string pr = routes.CentralToPR[routes.CentralToPR.Count - 1].To;
-                    if(_arrStation == pr)
-                    {
-                        timetable[_tramId].renewTimeTable(timetable[_tramId].totalTime);
-                        newTime += 90;
-                        emptyRate = rates.TramEmptyRate(simState.Day, _arrStation, tram.Direction, tram, StartTime);
-
-                        var exited = tram.EmptyTram(emptyRate);
-                        //Determine waiting time for people who just entered the tram
-                        //Determine time that a person left the tram and at which station he did
-                        exited.ForEach(x =>
-                        {
-                            persons[x].LeaveTime = StartTime;
-                            persons[x].LeftAt = _arrStation;
-                        });
-
-                        //Add emptying and filling time of the tram
-                        newTime += rates.TramEmptyTime(exited.Count);
-                        simState.EventQueue.AddEvent(new TurnAroundFree(_tramId, newTime, _arrStation));
-                        return;
-                    }
-
-                    emptyRate = rates.TramEmptyRate(simState.Day, _arrStation, tram.Direction, tram, StartTime);
-                    fillRate = rates.TramFillRate(station, tram);
-
-                    var pplExited = tram.EmptyTram(emptyRate);
-                    var pplEntered = tram.FillTram(station.WaitingPersonsToPR, fillRate);
-                    //update waiting times
-                    pplEntered.ForEach(x => 
-                    {
-                        persons[x].SetWaitingTime(StartTime);
-                        persons[x].ArrivedAt = _arrStation;
-                    });
-                    pplExited.ForEach(x => 
-                    {
-                        persons[x].LeaveTime = StartTime;
-                        persons[x].LeftAt = _arrStation;
-                    });
-
-                    //Add emptying and filling time of the tram
-                    newTime += rates.TramEmptyTime(pplExited.Count) + rates.TramFillTime(fillRate);
-
-                    //Add delay time if doors were shut
-                    if (rates.DoorMalfunction()) { newTime += 60; }
-
-                    Event e = new TramExpectedDeparture(_tramId, newTime, _arrStation);
-                    simState.EventQueue.AddEvent(e);
-
-                }
+                HandleEndStationEvent(simState);
             }
             else
             {
-                if(station.TramIsStationedCS || (station.lastTramCS != nextTram && station.lastTramCS != -1))
+                if(Routes.ToPR(tram.Direction) && station.TramIsStationedPR)
                 {
-                    //Console.WriteLine("Tram " + _tramId + " enters the queue to CS");
+                    station.WaitingTramsToPR.Enqueue(_tramId);
+                }
+                else if(Routes.ToCS(tram.Direction) && station.TramIsStationedCS)
+                {
                     station.WaitingTramsToCS.Enqueue(_tramId);
-                    //Console.WriteLine(station.WaitingTramsToCS.Count);
                 }
-                else
+
+                tram.State = Tram.TramState.AtStation;
+                tram.Station = _arrStation;
+
+                emptyRate = rates.TramEmptyRate(simState.Day, _arrStation, tram.Direction, tram, StartTime);
+                fillRate = rates.TramFillRate(station, tram);
+
+                var pplExited = tram.EmptyTram(emptyRate);
+                var waitingppl = _arrStation == "PR" ? station.WaitingPersonsToPR : station.WaitingPersonsToCS;
+                var pplEntered = tram.FillTram(waitingppl, fillRate);
+                //update waiting times
+                pplEntered.ForEach(x =>
                 {
-                    station.TramIsStationedCS = true;
-                    tram.State = Tram.TramState.AtStation;
-                    tram.Station = _arrStation;
-                    string cs = routes.PRToCentral[routes.PRToCentral.Count - 1].To;
-                    if (_arrStation == cs)
-                    {
-                        newTime += 90;
-                        emptyRate = rates.TramEmptyRate(simState.Day, _arrStation, tram.Direction, tram, StartTime);
+                    persons[x].SetWaitingTime(StartTime);
+                    persons[x].ArrivedAt = _arrStation;
+                });
+                pplExited.ForEach(x =>
+                {
+                    persons[x].LeaveTime = StartTime;
+                    persons[x].LeftAt = _arrStation;
+                });
 
-                        var exited = tram.EmptyTram(emptyRate);
-                        //Determine waiting time for people who just entered the tram
-                        //Determine time that a person left the tram and at which station he did
-                        exited.ForEach(x =>
-                        {
-                            persons[x].LeaveTime = StartTime;
-                            persons[x].LeftAt = _arrStation;
-                        });
+                //Add emptying and filling time of the tram
+                newTime += rates.TramEmptyTime(pplExited.Count) + rates.TramFillTime(fillRate);
 
-                        //Add emptying and filling time of the tram
-                        newTime += rates.TramEmptyTime(exited.Count);
-                        simState.EventQueue.AddEvent(new TurnAroundFree(_tramId, newTime, _arrStation));
-                        return;
-                    }
+                //Add delay time if doors were shut
+                if (rates.DoorMalfunction()) { newTime += 60; }
 
-                    emptyRate = rates.TramEmptyRate(simState.Day, _arrStation, tram.Direction, tram, StartTime);
-                    fillRate = rates.TramFillRate(station, tram);
-                  
-                    var pplExited = tram.EmptyTram(emptyRate);
-                    var pplEntered = tram.FillTram(station.WaitingPersonsToCS, fillRate);
-                    //Determine waiting time for people who just entered the tram
-                    pplEntered.ForEach(x => 
-                    {
-                        persons[x].SetWaitingTime(StartTime);
-                        persons[x].ArrivedAt = _arrStation;
-                    });
-                    //Determine time that a person left the tram and at which station he did
-                    pplExited.ForEach(x =>
-                    {
-                        persons[x].LeaveTime = StartTime;
-                        persons[x].LeftAt = _arrStation;
-                    });
-
-                    //Add emptying and filling time of the tram
-                    newTime += rates.TramEmptyTime(pplExited.Count) + rates.TramFillTime(fillRate);
-
-                    //Add delay time if doors were shut
-                    if (rates.DoorMalfunction()) { newTime += 60; }
-
-                    Event e = new TramExpectedDeparture(_tramId, newTime, _arrStation);
-                    simState.EventQueue.AddEvent(e);
-                }
+                Event e = new TramExpectedDeparture(_tramId, _arrStation, newTime);
+                simState.EventQueue.AddEvent(e);
             }
-            
         }
 
+        private void HandleEndStationEvent(SimulationState simState)
+        {
+            var tram = simState.Trams[_tramId];
+            var persons = simState.Persons;
+            var rates = simState.Rates;
+            var timetable = simState.TimeTables;
+            var station = simState.Stations[_arrStation];
 
+            double newTime = StartTime + 10;
+            double emptyRate = 0;
+
+            timetable[_tramId].renewTimeTable(timetable[_tramId].totalTime);
+            emptyRate = rates.TramEmptyRate(simState.Day, _arrStation, tram.Direction, tram, StartTime);
+
+            var exited = tram.EmptyTram(emptyRate);
+            //Determine waiting time for people who just entered the tram
+            //Determine time that a person left the tram and at which station he did
+            exited.ForEach(x =>
+            {
+                persons[x].LeaveTime = StartTime;
+                persons[x].LeftAt = _arrStation;
+            });
+
+            //Add emptying and filling time of the tram
+            newTime += rates.TramEmptyTime(exited.Count);
+            var waitingtrams = _arrStation == "PR" ? station.WaitingTramsToPR : station.WaitingTramsToCS;
+            if(waitingtrams.Count > 0)
+            {
+                waitingtrams.Enqueue(_tramId);
+            }
+            else
+            {
+                simState.EventQueue.AddEvent(new EnterCrossing(_tramId, _arrStation, newTime));
+            }
+        }
 
         public override string ToString()
         {

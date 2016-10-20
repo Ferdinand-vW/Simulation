@@ -153,8 +153,11 @@ namespace TramSimulator
 
             var timeTables = new Dictionary<int, TimeTable>();
 
+            var crossingCS = new Crossing("CS");
+            var crossingPR = new Crossing("PR");
 
-            return new SimulationState(trams, stations, eventQueue, routes, rates, timeTables, day);
+
+            return new SimulationState(trams, stations, eventQueue, routes, rates, timeTables, day, crossingPR, crossingCS);
         }
 
         static public List<Track> GenerateRoute(string[] stationNames)

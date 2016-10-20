@@ -18,8 +18,8 @@ namespace TramSimulator
         static void Main(string[] args)
         {
             Console.WriteLine("Start reading passengercount data..");
-            String patha = @"../a_data_updated.csv";
-            String pathb = @"../b_data_updated.csv";
+            String patha = @"../../../a_data_updated.csv";
+            String pathb = @"../../../b_data_updated.csv";
 
             Stream streama = File.Open(patha, FileMode.Open);
             Stream streamb = File.Open(pathb, FileMode.Open);
