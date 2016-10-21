@@ -6,12 +6,12 @@ using TramSimulator.States;
 
 namespace TramSimulator.Events
 {
-    class TurnAroundFree : Event
+    class ExpectedTurnAround : Event
     {
         int _tramId;
         string _arrStation;
 
-        public TurnAroundFree(int tramId, double startTime, string arrStation)
+        public ExpectedTurnAround(int tramId, double startTime, string arrStation)
         {
             this._tramId = tramId;
             this.StartTime = startTime;
@@ -20,11 +20,18 @@ namespace TramSimulator.Events
 
         public override void execute(SimulationState simState)
         {
+           
             Tram tram = simState.Trams[_tramId];
             Station station = simState.Stations[_arrStation];
+
             double newTime = StartTime + 90;
+
             if (_arrStation == "CS")
             {
+                if (station.TramIsStationedPR ) {
+                    simState.turnAroundCS.Enqueue(_tramId);
+                    return;
+                }
                 tram.Direction = Routes.Dir.ToPR;
                 station.TramIsStationedCS = false;
                 if (station.WaitingTramsToCS.Count > 0)
@@ -35,6 +42,11 @@ namespace TramSimulator.Events
             }
             if (_arrStation == "PR")
             {
+                if (station.TramIsStationedCS )
+                {
+                    simState.turnAroundPR.Enqueue(_tramId);
+                    return;
+                }
                 tram.Direction = Routes.Dir.ToCS;
                 station.TramIsStationedPR = false;
                 if (station.WaitingTramsToPR.Count > 0)

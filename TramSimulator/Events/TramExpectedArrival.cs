@@ -65,7 +65,7 @@ namespace TramSimulator.Events
 
                         //Add emptying and filling time of the tram
                         newTime += rates.TramEmptyTime(exited.Count);
-                        simState.EventQueue.AddEvent(new TurnAroundFree(_tramId, newTime, _arrStation));
+                        simState.EventQueue.AddEvent(new ExpectedTurnAround(_tramId, newTime, _arrStation));
                         return;
                     }
 
@@ -127,7 +127,7 @@ namespace TramSimulator.Events
 
                         //Add emptying and filling time of the tram
                         newTime += rates.TramEmptyTime(exited.Count);
-                        simState.EventQueue.AddEvent(new TurnAroundFree(_tramId, newTime, _arrStation));
+                        simState.EventQueue.AddEvent(new ExpectedTurnAround(_tramId, newTime, _arrStation));
                         return;
                     }
 

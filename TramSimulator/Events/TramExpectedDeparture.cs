@@ -86,6 +86,10 @@ namespace TramSimulator.Events
                     var wTramId = station.WaitingTramsToCS.Dequeue();
                     eventQueue.AddEvent(new TramExpectedArrival(wTramId, StartTime, _depStation));
                 }
+                if (_depStation == "PR" && simState.turnAroundPR.Count > 0) {
+                    var wTramId = simState.turnAroundPR.Dequeue();
+                    eventQueue.AddEvent(new ExpectedTurnAround(wTramId, StartTime, _depStation));
+                }
             }
             else
             {
@@ -95,6 +99,11 @@ namespace TramSimulator.Events
                 {
                     var wTramId = station.WaitingTramsToPR.Dequeue();
                     eventQueue.AddEvent(new TramExpectedArrival(wTramId, StartTime, _depStation));
+                }
+                if (_depStation == "CS" && simState.turnAroundCS.Count > 0)
+                {
+                    var wTramId = simState.turnAroundCS.Dequeue();
+                    eventQueue.AddEvent(new ExpectedTurnAround(wTramId, StartTime, _depStation));
                 }
             }
 
