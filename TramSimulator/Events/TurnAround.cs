@@ -24,7 +24,6 @@ namespace TramSimulator.Events
             var station = simState.Stations[_arrStation];
             var timetable = simState.TimeTable;
 
-            tram.Direction = TurnDirection(tram.Direction);
             tram.State = Tram.TramState.AtStation;
             tram.Station = _arrStation;
             var persons = simState.Persons;
@@ -35,9 +34,11 @@ namespace TramSimulator.Events
             double newTime = StartTime;
 
             double emptyRate = rates.TramEmptyRate(simState.Day, _arrStation, tram.Direction, tram, StartTime);
-            int fillRate = rates.TramFillRate(station, tram);
-
             var pplExited = tram.EmptyTram(emptyRate);
+
+            tram.Direction = TurnDirection(tram.Direction);
+
+            int fillRate = rates.TramFillRate(station, tram);
             var waitingppl = Routes.ToPR(tram.Direction) ? station.WaitingPersonsToPR : station.WaitingPersonsToCS;
             var pplEntered = tram.FillTram(waitingppl, fillRate);
             //simState.sw.WriteLine("People entered: " + pplEntered.Count);
@@ -59,11 +60,11 @@ namespace TramSimulator.Events
             newTime += rates.TramEmptyTime(pplExited.Count) + rates.TramFillTime(fillRate);
 
             //Add delay time if doors were shut
-            if (rates.DoorMalfunction()) { newTime += Constants.SECONDS_IN_MINUTE; }
+            //if (rates.DoorMalfunction()) { newTime += Constants.SECONDS_IN_MINUTE; }
 
             newTime = timetable.UpdateTimetable(_tramId, _arrStation, newTime + timetable.TurnAroundTime);
 
-            if(newTime <= 0) { throw new Exception("test"); }
+            if (newTime <= 0) { throw new Exception("test"); }
             simState.sw.WriteLine("Generated departure for " + _tramId + " at " + newTime);
             simState.EventQueue.AddEvent(new TramExpectedDeparture(_tramId, _arrStation, newTime));
         }

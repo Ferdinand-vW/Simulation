@@ -57,7 +57,7 @@ namespace TramSimulator
             //If it had been delayed then we should leave asap
             var depTimeNew = Math.Max(arrTime, depTimeExpected);
             //Set the new delay time
-            _expectedDepartureTimes[tramId] = depTimeNew;
+            _expectedDepartureTimes[tramId] = depTimeExpected;
 
             //Updates any incurred delays
             DetermineDelays(tramId, depTimeExpected, depTimeNew, depStation);
@@ -68,6 +68,7 @@ namespace TramSimulator
         public void DetermineDelays(int tramId, double depTimeExpected, double depTimeNew, string depStation)
         {
             var delay = depTimeNew - depTimeExpected;
+
             bool moreThanAMinute = false;
             //Store the delay in the list
             if(depStation == Constants.PR) { DelaysAtPR[tramId].Add(delay); }

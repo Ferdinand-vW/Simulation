@@ -57,14 +57,14 @@ namespace TramSimulator.Events
                 Tram nextTram = simState.Trams[id.Value];
                 //Tram may only depart if there is 40s between the next tram and this one
                 simState.sw.WriteLine("time: " + currTime + " " + nextTram.DepartureTime);
-                if (currTime - nextTram.DepartureTime >= Constants.TIME_IN_BETWEEN)
+                if (Math.Ceiling(currTime - nextTram.DepartureTime) >= Constants.TIME_IN_BETWEEN)
                 {
                     HandleDepartureEvent(simState);
                 }
                 else //Tram was not able to depart and has to schedule new departure
                 {
-                    double timeDiff = Constants.TIME_IN_BETWEEN - (currTime - nextTram.DepartureTime);
-                    tram.DepartureTime = timeDiff + StartTime;
+                    double timeDiff = Constants.TIME_IN_BETWEEN - (Math.Ceiling(currTime - nextTram.DepartureTime));
+
                     eventQueue.AddEvent(new TramExpectedDeparture(_tramId, _depStation, StartTime + timeDiff));
                 }
             }

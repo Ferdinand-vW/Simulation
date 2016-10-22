@@ -61,10 +61,8 @@ namespace TramSimulator.Events
                         station.TramIsStationedCS = true;
                     }
 
-
                     tram.State = Tram.TramState.AtStation;
                     tram.Station = _arrStation;
-
 
                     emptyRate = rates.TramEmptyRate(simState.Day, _arrStation, tram.Direction, tram, StartTime);
                     fillRate = rates.TramFillRate(station, tram);
