@@ -80,7 +80,7 @@ namespace TramSimulator
 
         public bool DoorMalfunction()
         {
-            return Generate.uniform(0, 5) == 0;
+            return Generate.uniform(0, 1) < 0.05;
         }
 
         public double TramEmptyRate(DayOfWeek day, string station, Routes.Dir dir, Tram tram, double time)

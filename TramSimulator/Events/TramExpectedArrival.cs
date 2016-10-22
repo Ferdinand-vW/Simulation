@@ -36,7 +36,7 @@ namespace TramSimulator.Events
             //Tram has to wait until station is empty
             if (tram.Direction == Routes.Dir.ToPR)
             {
-                if(station.TramIsStationedPR || (station.lastTramPR != nextTram && station.lastTramPR != -1))
+                if(station.TramIsStationedPR || (station.lastTramPR != nextTram && !(station.lastTramPR == -1 && _tramId == 0)))
                 {
                     //Console.WriteLine("Tram " + _tramId + " enters the queue to PR");
                     station.WaitingTramsToPR.Enqueue(_tramId);
@@ -99,7 +99,7 @@ namespace TramSimulator.Events
             }
             else
             {
-                if(station.TramIsStationedCS || (station.lastTramCS != nextTram && station.lastTramCS != -1))
+                if(station.TramIsStationedCS || (station.lastTramCS != nextTram && !(station.lastTramCS == -1 && _tramId == 0)))
                 {
                     //Console.WriteLine("Tram " + _tramId + " enters the queue to CS");
                     station.WaitingTramsToCS.Enqueue(_tramId);

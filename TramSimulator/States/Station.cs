@@ -19,6 +19,8 @@ namespace TramSimulator.States
         public bool TramIsStationedCS { get; set; }
         public int lastTramPR { get; set; }
         public int lastTramCS { get; set; }
+        public double lastTramTimeCS{ get; set;}
+        public double lastTramTimePR{ get; set; }
         public Station(String name)
         {
             this._name = name;
@@ -29,6 +31,9 @@ namespace TramSimulator.States
             this.TramIsStationedPR = false;
             this.TramIsStationedCS = false;
             lastTramCS = -1;
+            lastTramTimeCS = 0;
+
+            lastTramTimePR = 0;
             lastTramPR = -1;
         }
 

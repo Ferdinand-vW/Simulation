@@ -33,29 +33,25 @@ namespace TramSimulator.Events
             string central = simState.Routes.CentralToPR[0].From;
             double timeFromPR = simState.TimeTables[_tramId].startTime;
             string pr = simState.Routes.PRToCentral[0].From;
+            var station = simState.Stations[_depStation];
 
             if (_depStation == central && StartTime < timeFromCentral)
                 eventQueue.AddEvent(new TramExpectedDeparture(_tramId, timeFromCentral, _depStation));
             //  Op PR wachten op time table
             else if (_depStation == pr && StartTime < timeFromPR)
                 eventQueue.AddEvent(new TramExpectedDeparture(_tramId, timeFromPR, _depStation));
-            else if (id.HasValue) //If there exists a tram on the same track
+            else //If there exists a tram on the same track
             {
-                Tram nextTram = simState.Trams[id.Value];
                 //Tram may only depart if there is 40s between the next tram and this one
-                if (currTime - nextTram.DepartureTime >= 40)
+                double lastTramTime = tram.Direction == Routes.Dir.ToCS ? station.lastTramTimeCS : station.lastTramTimePR;
+                if (currTime - lastTramTime >= 40)
                 {
                     HandleDepartureEvent(simState);
                 }
                 else //Tram was not able to depart and has to schedule new departure
                 {
-                    double timeDiff = currTime + (40 - currTime - nextTram.DepartureTime);
                     eventQueue.AddEvent(new TramExpectedDeparture(_tramId, StartTime + timeDiff, _depStation));
                 }
-            }
-            else
-            {
-                HandleDepartureEvent(simState);
             }
         }
 
@@ -80,6 +76,7 @@ namespace TramSimulator.Events
                 //Console.WriteLine("Trams waiting to at " + _depStation + " to CS: " + station.WaitingTramsToCS.Count);
                 //if there was a tram waiting create an arrival event
                 station.lastTramCS = _tramId;
+                station.lastTramTimeCS = StartTime;
                 station.TramIsStationedCS = false;
                 if (station.WaitingTramsToCS.Count > 0)
                 {
@@ -94,6 +91,7 @@ namespace TramSimulator.Events
             else
             {
                 station.lastTramPR = _tramId;
+                station.lastTramTimePR = StartTime;
                 station.TramIsStationedPR = false;
                 if (station.WaitingTramsToPR.Count > 0)
                 {

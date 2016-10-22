@@ -12,12 +12,13 @@ namespace TramSimulator.Events
     {
         int _tramId;
         string _station;
-
-        public EnterTrack(int tramId, double startTime, string station)
+        int q ;
+        public EnterTrack(int tramId, double startTime, string station, int q)
         {
             this._tramId = tramId;
             this._station = station;
             this.StartTime = startTime;
+            this.q = q;
         }
 
         public override void execute(SimulationState simState)
@@ -29,8 +30,9 @@ namespace TramSimulator.Events
             tram.State = Tram.TramState.AtStation;
             //Add an initial event
             var eventQueue = simState.EventQueue;
-
-            simState.TimeTables[_tramId] = new TimeTable(StartTime);
+            
+            simState.Stations[_station].TramIsStationedCS = true;
+            simState.TimeTables[_tramId] = new TimeTable(StartTime,q);
             eventQueue.AddEvent(new TramExpectedDeparture(_tramId, StartTime, _station));
         }
 

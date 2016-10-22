@@ -21,11 +21,11 @@ namespace TramSimulator
         public double startTime;
         public double halfTime; // voor het wachten op een eindstation
         public double totalTime; //voor de volgende timeTable
+        int q;
 
-
-        public TimeTable(double startTime)
+        public TimeTable(double startTime, int q)
         {
-
+            this.q = q;
             PRtotalDelay = 0;
             PRmaxDelay = 0;
             PRnumberOverOneMinute = 0;
@@ -41,7 +41,7 @@ namespace TramSimulator
         {
             numberOfRounds++;
             double oneWayDrivingTime = 17 * 60;
-            double turnAroundTime = 4 * 60;
+            double turnAroundTime = q * 60;
             this.startTime = startTime;
             halfTime = startTime + oneWayDrivingTime + turnAroundTime;
             totalTime = halfTime + oneWayDrivingTime + turnAroundTime;
