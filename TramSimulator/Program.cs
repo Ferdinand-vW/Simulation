@@ -88,17 +88,19 @@ namespace TramSimulator
             Console.WriteLine("Finished reading passengercount data");
             Console.WriteLine("Start simulation");
             Simulation sim = new Simulation(a,b);
-            var results = sim.run(false, 15, null, DayOfWeek.Monday, enterPrognoseA.Keys.ToArray());
+            //debug, frequency, turnaroundtime, day, stations
+            var results = sim.run(false, 15, 120, DayOfWeek.Monday, enterPrognoseA.Keys.ToArray());
 
-            var trams = results.TimeTables.Values.ToList();
+            var trams = results.Trams;
+            var timetable = results.TimeTable;
             var persons = results.Persons.Values.ToList();
 
             //Maximum delay of a tram
             Console.Write("Maximum delay: ");
-            Console.WriteLine(trams.Max(x => Math.Max(x.PRmaxDelay, x.CSmaxDelay)));
+            Console.WriteLine(Math.Max(timetable.CSmaxDelay, timetable.PRmaxDelay));
             //Average total delay of a tram
             Console.Write("Average delay: ");
-            Console.WriteLine(trams.Sum(x => x.PRtotalDelay + x.CStotalDelay) / trams.Count);
+            Console.WriteLine((timetable.CStotalDelay + timetable.PRtotalDelay) / trams.Count);
             //Max waiting time of a person
             Console.Write("Maximum waiting time: ");
             Console.WriteLine(persons.Max(x => x.WaitingTime));

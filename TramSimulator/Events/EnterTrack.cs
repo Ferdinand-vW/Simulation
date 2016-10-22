@@ -10,10 +10,10 @@ namespace TramSimulator.Events
 {
     public class EnterTrack : Event
     {
-        int _tramId;
+       // int _tramId;
         string _station;
 
-        public EnterTrack(int tramId, double startTime, string station)
+        public EnterTrack(int tramId, string station, double startTime)
         {
             this._tramId = tramId;
             this._station = station;
@@ -23,19 +23,46 @@ namespace TramSimulator.Events
         public override void execute(SimulationState simState)
         {
             var station = simState.Stations[_station];
-            station.TramAtPR = _tramId;
-            station.TramIsStationedPR = true;
-            //Insert the tram into the route
-            var route = simState.Routes.PRToCentral;
-            route[0].Trams.Add(_tramId);
-            var tram = simState.Trams[_tramId];
-            tram.State = Tram.TramState.AtStation;
-            tram.Station = _station;
-            //Add an initial event
-            var eventQueue = simState.EventQueue;
+            var crossing = simState.GetCrossing(_station);
+            //If the tram can enter PR
+            if(!station.TramIsStationedPR || !station.TramIsStationedCS)
+            {
+                if (!station.TramIsStationedPR)
+                {
+                    station.TramAtPR = _tramId;
+                    station.TramIsStationedPR = true;
+                }
+                else if (!station.TramIsStationedCS)
+                {
+                    station.TramAtCS = _tramId;
+                    station.TramIsStationedCS = true;
+                }
 
-            simState.TimeTables[_tramId] = new TimeTable(StartTime);
-            eventQueue.AddEvent(new TramExpectedDeparture(_tramId, _station, StartTime));
+                //Insert the tram into the route
+                var route = simState.Routes.PRToCentral;
+                route[0].Trams.Insert(0, _tramId);
+                var tram = simState.Trams[_tramId];
+                tram.State = Tram.TramState.AtStation;
+                tram.Station = _station;
+                //Add an initial event
+                var eventQueue = simState.EventQueue;
+
+                eventQueue.AddEvent(new DepartCrossing(_tramId, _station, StartTime));
+
+                if(station.EnterTrackQueue.Count > 0)
+                {
+                    var nextTramId = station.EnterTrackQueue.Dequeue();
+                    eventQueue.AddEvent(new EnterTrack(nextTramId, _station, StartTime));
+                }
+                else
+                {
+                    Crossing.HandleCrossingQueues(station, crossing, eventQueue, StartTime);
+                }
+            }
+            else
+            {   //Insert the tram into an entertrack queue. This queue has the highest priority.
+                station.EnterTrackQueue.Enqueue(_tramId);
+            }
         }
 
         public override string ToString()

@@ -10,6 +10,7 @@ namespace TramSimulator.Events
     public class Event
     {
         public double StartTime { get; set; }
+        public int _tramId { get; set; }
 
 
         public virtual void execute(SimulationState simState) { }

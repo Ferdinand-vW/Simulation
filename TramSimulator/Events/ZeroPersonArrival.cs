@@ -27,7 +27,7 @@ namespace TramSimulator.Events
             }
             else
             {
-                simState.EventQueue.AddEvent(new ZeroPersonArrival(StartTime + (60 * 15), _stationName, _direction));
+                simState.EventQueue.AddEvent(new ZeroPersonArrival(StartTime + (Constants.SECONDS_IN_MINUTE * 15), _stationName, _direction));
             }
         }
 

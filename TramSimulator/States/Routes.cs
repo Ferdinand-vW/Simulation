@@ -19,9 +19,11 @@ namespace TramSimulator.States
             this.PRToCentral = prToCentral;
         }
 
-        public int? NextTram(int tramId, string depStation)
+        public int? NextTram(int tramId, string depStation, SimulationState simState)
         {
+
             Track t = GetTrack(tramId);
+
             int index = t.Trams.IndexOf(tramId);
 
             if (index == t.Trams.Count - 1) { return null; }
@@ -51,10 +53,17 @@ namespace TramSimulator.States
             return dir == Dir.ToPR;
         }
 
-        public void MoveToNextTrack(int tramId, string depStation)
+        public void MoveToNextTrack(int tramId, string depStation, SimulationState simState)
         {
             Track t = GetTrack(tramId);
             //Remove the tram if it was previously on a track
+            if (t.Trams.Last() != tramId)
+            {
+                simState.sw.Flush();
+                simState.sw.Close();
+                Console.WriteLine("test");
+            }
+
             if(t != null) { t.Trams = t.Trams.Take(t.Trams.Count - 1).ToList(); }
 
             //Find the next track and insert it into the next track
@@ -79,7 +88,9 @@ namespace TramSimulator.States
         private Track GetNextTrack(string depStation, string prevStation)
         {
 
-            return CentralToPR.Union(PRToCentral).First(x => x.From == depStation && x.To != prevStation || (depStation == "CS" && x.From == "CS") || (depStation == "PR" && x.From == "PR"));
+            return CentralToPR.Union(PRToCentral).First(x => x.From == depStation && x.To != prevStation 
+                                                          || (depStation == Constants.CS && x.From == Constants.CS) 
+                                                          || (depStation == Constants.PR && x.From == Constants.PR));
         }
     }
 
