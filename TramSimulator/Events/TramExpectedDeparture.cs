@@ -50,6 +50,7 @@ namespace TramSimulator.Events
                 }
                 else //Tram was not able to depart and has to schedule new departure
                 {
+                    double timeDiff = (40 - (currTime - lastTramTime))+0.01; // + 0.01 voor C#
                     eventQueue.AddEvent(new TramExpectedDeparture(_tramId, StartTime + timeDiff, _depStation));
                 }
             }
