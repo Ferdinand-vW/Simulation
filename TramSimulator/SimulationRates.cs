@@ -38,7 +38,7 @@ namespace TramSimulator
 
         public double TramArrivalRate(string depStation, string arrStation)
         {
-            return AvgTramArrival(depStation,arrStation);//Generate.logNormalWitouthVariance(AvgTramArrival(depStation, arrStation));
+            return Generate.logNormalWitouthVariance(AvgTramArrival(depStation, arrStation));
         }
 
         public double AvgTramArrival(string depStation, string arrStation)
@@ -80,7 +80,7 @@ namespace TramSimulator
 
         public bool DoorMalfunction()
         {
-            return Generate.uniform(0, 5) == 0;
+            return Generate.uniform(0, 5) < 1;
         }
 
         public double TramEmptyRate(DayOfWeek day, string station, Routes.Dir dir, Tram tram, double time)

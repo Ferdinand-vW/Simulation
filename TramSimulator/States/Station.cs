@@ -45,7 +45,7 @@ namespace TramSimulator.States
         public void PrintQueues(SimulationState simState)
         {
             var sw = simState.sw;
-            var crossing = simState.GetCrossing(Name);
+
             if (WaitingTramsToPR.Count > 0)
             {
                 sw.Write("Waiting Trams to PR: ");
@@ -56,7 +56,7 @@ namespace TramSimulator.States
             if (WaitingTramsToCS.Count > 0)
             {
                 sw.Write("Waiting Trams to CS: ");
-                WaitingTramsToCS.ToList().ForEach(x => sw.WriteLine(x + " "));
+                WaitingTramsToCS.ToList().ForEach(x => sw.Write(x + " "));
                 sw.WriteLine();
             }
 
@@ -67,17 +67,12 @@ namespace TramSimulator.States
                 sw.WriteLine();
             }
 
-            if (crossing.WaitingQueue.Count > 0)
-            {
-                sw.Write("Crossing queue: ");
-                crossing.WaitingQueue.ToList().ForEach(x => sw.Write(x + " "));
-                sw.WriteLine();
-            }
-
-            if(WaitingTramsToCS.Count == 0 && WaitingTramsToPR.Count == 0 && EnterTrackQueue.Count == 0 && crossing.WaitingQueue.Count == 0)
+            if(WaitingTramsToCS.Count == 0 && WaitingTramsToPR.Count == 0 && EnterTrackQueue.Count == 0)
             {
                 sw.WriteLine("All queues are empty");
             }
+
+            //sw.WriteLine("Station " + Name + ": " + WaitingPersonsToPR.Count + " " + WaitingPersonsToCS.Count);
 
         }
         

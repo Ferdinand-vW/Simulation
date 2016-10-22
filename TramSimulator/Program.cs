@@ -85,11 +85,13 @@ namespace TramSimulator
             passengerCountsA.ForEach(x => a.AddPC(x));
             passengerCountsB.ForEach(x => b.AddPC(x));
 
+            exitPrognoseB.Values.ToList().ForEach(x => Console.WriteLine(x));
+
             Console.WriteLine("Finished reading passengercount data");
             Console.WriteLine("Start simulation");
             Simulation sim = new Simulation(a,b);
             //debug, frequency, turnaroundtime, day, stations
-            var results = sim.run(false, 15, 120, DayOfWeek.Monday, enterPrognoseA.Keys.ToArray());
+            var results = sim.run(false, 16, 120, DayOfWeek.Monday, enterPrognoseA.Keys.ToArray());
 
             var trams = results.Trams;
             var timetable = results.TimeTable;
@@ -97,10 +99,13 @@ namespace TramSimulator
 
             //Maximum delay of a tram
             Console.Write("Maximum delay: ");
-            Console.WriteLine(Math.Max(timetable.CSmaxDelay, timetable.PRmaxDelay));
+            Console.WriteLine(Math.Max(timetable.CSMaxDelay, timetable.PRMaxDelay));
             //Average total delay of a tram
             Console.Write("Average delay: ");
-            Console.WriteLine((timetable.CStotalDelay + timetable.PRtotalDelay) / trams.Count);
+            Console.WriteLine((timetable.CSAverageDelay + timetable.PRAverageDelay) / 2);
+            //Percentage delays over one minut
+            Console.Write("Percentage trams met delay over 1 minuut: ");
+            Console.WriteLine(timetable.DelaysOverOneMinute / trams.Count);
             //Max waiting time of a person
             Console.Write("Maximum waiting time: ");
             Console.WriteLine(persons.Max(x => x.WaitingTime));

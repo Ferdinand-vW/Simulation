@@ -23,7 +23,6 @@ namespace TramSimulator.Events
         public override void execute(SimulationState simState)
         {
             var station = simState.Stations[_station];
-            var crossing = simState.GetCrossing(_station);
             //If the tram can enter PR
             if(!station.TramIsStationedPR || !station.TramIsStationedCS)
             {
@@ -47,16 +46,23 @@ namespace TramSimulator.Events
                 //Add an initial event
                 var eventQueue = simState.EventQueue;
 
-                eventQueue.AddEvent(new DepartCrossing(_tramId, _station, StartTime));
+                if(station.EnterTrackQueue.Count > 0)
+                {
+                    station.EnterTrackQueue.Dequeue();
+                }
+                
+                eventQueue.AddEvent(new TramExpectedDeparture(_tramId, _station, StartTime));
 
                 if(station.EnterTrackQueue.Count > 0)
                 {
                     var nextTramId = station.EnterTrackQueue.Dequeue();
                     eventQueue.AddEvent(new EnterTrack(nextTramId, _station, StartTime));
                 }
-                else
+                else if(station.WaitingTramsToPR.Count > 0)
                 {
-                    Crossing.HandleCrossingQueues(station, crossing, eventQueue, StartTime);
+                    var nextTramId = station.WaitingTramsToPR.Peek();
+                    eventQueue.AddEvent(new TramExpectedArrival(nextTramId, StartTime, _station));
+
                 }
             }
             else

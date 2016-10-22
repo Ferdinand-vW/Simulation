@@ -72,6 +72,9 @@ namespace TramSimulator.Events
                     var pplExited = tram.EmptyTram(emptyRate);
                     var waitingppl = Routes.ToPR(tram.Direction) ? station.WaitingPersonsToPR : station.WaitingPersonsToCS;
                     var pplEntered = tram.FillTram(waitingppl, fillRate);
+                    //simState.sw.WriteLine("People entered: " + pplEntered.Count);
+                    //simState.sw.WriteLine("People exited: " + pplExited.Count);
+                    //simState.sw.WriteLine("Waiting people: " + waitingppl.Count);
                     //update waiting times
                     pplEntered.ForEach(x =>
                     {
@@ -90,6 +93,9 @@ namespace TramSimulator.Events
                     //Add delay time if doors were shut
                     if (rates.DoorMalfunction()) { newTime += Constants.SECONDS_IN_MINUTE; }
 
+                    var waitingtrams = Routes.ToCS(tram.Direction) ? station.WaitingTramsToCS : station.WaitingTramsToPR;
+                    if(waitingtrams.Count > 0 && waitingtrams.Peek() == _tramId) { waitingtrams.Dequeue(); }
+
                     Event e = new TramExpectedDeparture(_tramId, _arrStation, newTime);
                     simState.EventQueue.AddEvent(e);
                 }
@@ -105,14 +111,29 @@ namespace TramSimulator.Events
             var station = simState.Stations[_arrStation];
 
             var waitingtrams = _arrStation == Constants.PR ? station.WaitingTramsToPR : station.WaitingTramsToCS;
-            var crossing = simState.GetCrossing(_arrStation);
-            if(waitingtrams.Count > 0 || crossing.IsBeingCrossedBy != null || crossing.WaitingQueue.Count > 0)
+
+            if((waitingtrams.Count > 0 && waitingtrams.Peek() != _tramId)|| (station.TramAtPR.HasValue && station.TramAtCS.HasValue) || station.EnterTrackQueue.Count > 0)
             {
                 waitingtrams.Enqueue(_tramId);
             }
             else
             {
-                simState.EventQueue.AddEvent(new EnterCrossing(_tramId, _arrStation, StartTime));
+                if(!station.TramAtPR.HasValue)
+                {
+                    station.TramAtPR = _tramId;
+                    station.TramIsStationedPR = true;
+                }
+                else
+                {
+                    station.TramAtCS = _tramId;
+                    station.TramIsStationedCS = true;
+                }
+                //The only way to get to this point is if the tram is still at the head of the queue. 
+                //We've now set that this tram is at this station, so we can remove him from the queue.
+                if(waitingtrams.Count > 0)
+                { waitingtrams.Dequeue(); }
+                
+                simState.EventQueue.AddEvent(new TurnAround(_tramId, _arrStation, StartTime));
             }
         }
 

@@ -10,12 +10,19 @@ namespace TramSimulator
 {
     public class TimeTable
     {
-        public double PRtotalDelay { get { return DelaysAtPR.Values.SelectMany(x => x).Sum(); } }
-        public double PRmaxDelay { get { return DelaysAtPR.Values.SelectMany(x => x).Max(); } }
-        public int PRnumberOverOneMinute { get { return DelaysAboveOneMinutePR.Where(x => x.Value > 0).Count(); } }
-        public double CStotalDelay { get { return DelaysAtCS.Values.SelectMany(x => x).Sum(); } }
-        public double CSmaxDelay { get { return DelaysAtCS.Values.SelectMany(x => x).Max(); } }
-        public int CSnumberOverOneMinute { get { return DelaysAboveOneMinuteCS.Where(x => x.Value > 0).Count(); } }
+        public double PRAverageDelay { get { return DelaysAtPR.Values.SelectMany(x => x).Sum() / DelaysAtPR.Values.SelectMany(x => x).Count(); } }
+        public double PRMaxDelay { get { return DelaysAtPR.Values.SelectMany(x => x).Max(); } }
+        public double CSAverageDelay { get { return DelaysAtCS.Values.SelectMany(x => x).Sum() / DelaysAtCS.Values.SelectMany(x => x).Count(); } }
+        public double CSMaxDelay { get { return DelaysAtCS.Values.SelectMany(x => x).Max(); } }
+        public int DelaysOverOneMinute
+        {
+            get
+            {
+                return DelaysAboveOneMinutePR.Values.
+                       Zip(DelaysAboveOneMinuteCS.Values, (x, y) => Tuple.Create(x,y)).
+                       Select(x => x.Item1 + x.Item2).ToList().Count;
+            }
+        }
         public int NumberOfRounds { get; set; }
         public int TurnAroundTime { get; set; }
 

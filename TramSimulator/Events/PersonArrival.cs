@@ -25,6 +25,8 @@ namespace TramSimulator.Events
         {
             Station station = simState.Stations[_stationName];
             var persons = simState.Persons;
+            simState.counter++;
+            simState.sw.WriteLine("persons: " + simState.counter);
             if(_direction == Routes.Dir.ToCS)
             {
                 int pid = persons.Count;

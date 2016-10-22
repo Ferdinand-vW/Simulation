@@ -20,14 +20,14 @@ namespace TramSimulator
         public SimulationRates Rates {get;set;}
         public TimeTable TimeTable { get; set; }
         public DayOfWeek Day { get; set; }
-        Crossing _crossingAtPR;
-        Crossing _crossingAtCS;
+        public int counter { get; set; }
+
         public StreamWriter sw;
 
 
         public SimulationState(Dictionary<int, Tram> trams, Dictionary<string, Station> stations, 
                                EventQueue eventQueue, Routes routes, SimulationRates rates, 
-                               TimeTable timeTable, DayOfWeek day, Crossing crossingPR, Crossing crossingCS, StreamWriter sw)
+                               TimeTable timeTable, DayOfWeek day, StreamWriter sw)
         {
             this.Trams = trams;
             this.Stations = stations;
@@ -37,14 +37,7 @@ namespace TramSimulator
             this.Rates = rates;
             this.TimeTable = timeTable;
             this.Day = day;
-            this._crossingAtPR = crossingPR;
-            this._crossingAtCS = crossingCS;
             this.sw = sw;
-        }
-
-        public Crossing GetCrossing(string station)
-        {
-            return station == Constants.CS ? _crossingAtCS : _crossingAtPR;
         }
     }
 }

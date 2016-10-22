@@ -40,6 +40,9 @@ namespace TramSimulator.Events
             var pplExited = tram.EmptyTram(emptyRate);
             var waitingppl = Routes.ToPR(tram.Direction) ? station.WaitingPersonsToPR : station.WaitingPersonsToCS;
             var pplEntered = tram.FillTram(waitingppl, fillRate);
+            //simState.sw.WriteLine("People entered: " + pplEntered.Count);
+            //simState.sw.WriteLine("People exited: " + pplExited.Count);
+            //simState.sw.WriteLine("Waiting people: " + waitingppl.Count);
             //update waiting times
             pplEntered.ForEach(x =>
             {
@@ -60,7 +63,9 @@ namespace TramSimulator.Events
 
             newTime = timetable.UpdateTimetable(_tramId, _arrStation, newTime + timetable.TurnAroundTime);
 
-            simState.EventQueue.AddEvent(new DepartCrossing(_tramId, _arrStation, newTime));
+            if(newTime <= 0) { throw new Exception("test"); }
+            simState.sw.WriteLine("Generated departure for " + _tramId + " at " + newTime);
+            simState.EventQueue.AddEvent(new TramExpectedDeparture(_tramId, _arrStation, newTime));
         }
 
         private void GenerateEventForWaitingTram(SimulationState simState)
@@ -71,7 +76,7 @@ namespace TramSimulator.Events
                 if (station.WaitingTramsToCS.Count > 0)
                 {
                     var nextTramId = station.WaitingTramsToCS.Dequeue();
-                    simState.EventQueue.AddEvent(new EnterCrossing(nextTramId, _arrStation, StartTime));
+                    simState.EventQueue.AddEvent(new TramExpectedArrival(nextTramId, StartTime, _arrStation));
                 }
             }
             if (_arrStation == Constants.PR)
@@ -80,7 +85,7 @@ namespace TramSimulator.Events
                 if (station.WaitingTramsToPR.Count > 0)
                 {
                     var nextTramId = station.WaitingTramsToPR.Dequeue();
-                    simState.EventQueue.AddEvent(new EnterCrossing(nextTramId, _arrStation, StartTime));
+                    simState.EventQueue.AddEvent(new TramExpectedArrival(nextTramId, StartTime, _arrStation));
                 }
             }
         }
