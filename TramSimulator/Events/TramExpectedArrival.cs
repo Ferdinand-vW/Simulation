@@ -31,7 +31,7 @@ namespace TramSimulator.Events
             var sw = simState.sw;
             int nextTram = _tramId > 0 ? _tramId - 1 : simState.Trams.Count-1;
 
-            double newTime = StartTime + 10;
+            double newTime = StartTime;
             int fillRate = 0;
             double emptyRate = 0;
 
@@ -71,7 +71,10 @@ namespace TramSimulator.Events
                     var waitingppl = Routes.ToPR(tram.Direction) ? station.WaitingPersonsToPR : station.WaitingPersonsToCS;
 
                     emptyRate = rates.TramEmptyRate(simState.Day, _arrStation, tram.Direction, tram, StartTime);
+
+                    var oldPersonCount = tram.PersonsOnTram.Count;
                     var pplExited = tram.EmptyTram(emptyRate);
+                    var transfer = oldPersonCount - pplExited.Count;
 
                     fillRate = rates.TramFillRate(station, tram);
                    
@@ -79,10 +82,7 @@ namespace TramSimulator.Events
                     waitingppl.ToList().ForEach(x => persons[x].PassedTrams.Add(Tuple.Create(_tramId, tram.PersonsOnTram.Count)));
                     var oldtramcount = new List<int>(tram.PersonsOnTram);
                     var pplEntered = tram.FillTram(waitingppl, fillRate);
-                    if(pplEntered.Count != oldwaitingppl.Count && (oldtramcount.Count < Tram.CAPACITY && Tram.CAPACITY - oldtramcount.Count != pplEntered.Count))
-                    {
-                        Console.WriteLine();
-                    }
+
                     //simState.sw.WriteLine("People entered: " + pplEntered.Count);
                     //simState.sw.WriteLine("People exited: " + pplExited.Count);
                     //simState.sw.WriteLine("Waiting people: " + waitingppl.Count);
@@ -108,15 +108,10 @@ namespace TramSimulator.Events
                         //sw.WriteLine("\tLeft at is " + persons[x].LeaveTime);
                        // sw.WriteLine("\tTravel + wait time is " + (persons[x].LeaveTime - persons[x].ArrivalTime));
                        // sw.WriteLine("\tTravel time is " + (persons[x].LeaveTime - persons[x].EnteredTramTime));
-                        if (persons[x].LeaveTime - persons[x].ArrivalTime > 5000)
-                        {
-                            Person p = persons[x];
-                            //Console.WriteLine();
-                        }
                     });
 
                     //Add emptying and filling time of the tram
-                    newTime += rates.TramEmptyTime(pplExited.Count) + rates.TramFillTime(fillRate);
+                    newTime += rates.DwellTime(pplEntered.Count, pplExited.Count, transfer);
 
                     //Add delay time if doors were shut
                     if (rates.DoorMalfunction()) { newTime += Constants.SECONDS_IN_MINUTE; }

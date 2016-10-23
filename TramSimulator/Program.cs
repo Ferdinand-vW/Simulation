@@ -7,6 +7,7 @@ using System.Linq;
 using System.IO;
 using System.Text;
 using System.Threading;
+using System.Threading.Tasks;
 
 using TramSimulator.Events;
 using TramSimulator.States;
@@ -85,50 +86,71 @@ namespace TramSimulator
             passengerCountsA.ForEach(x => a.AddPC(x));
             passengerCountsB.ForEach(x => b.AddPC(x));
 
-            exitPrognoseB.Values.ToList().ForEach(x => Console.WriteLine(x));
-
             Console.WriteLine("Finished reading passengercount data");
-            Console.WriteLine("Start simulation");
             Simulation sim = new Simulation(a,b);
             //debug, frequency, turnaroundtime, day, stations
-            var results = sim.run(false, 20, 120, DayOfWeek.Monday, enterPrognoseA.Keys.ToArray());
 
-            var trams = results.Trams;
-            var timetable = results.TimeTable;
-            var persons = results.Persons.Values.ToList();
+            List<double> csMaxDelays = new List<double>();
+            List<double> prMaxDelays = new List<double>();
+            List<double> csAvgDelays = new List<double>();
+            List<double> prAvgDelays = new List<double>();
+            List<double> prcDelaysOverOneMinute = new List<double>();
+            List<double> maxWaitTimes = new List<double>();
+            List<double> avgWaitTimes = new List<double>();
+            List<double> maxTravelTimes = new List<double>();
+            List<double> avgTravelTimes = new List<double>();
+            List<double> csMaxQueueSizes = new List<double>();
+            List<double> prMaxQueueSizes = new List<double>();
+            Console.WriteLine("Start simulation");
 
-            //Maximum delay of a tram
-            Console.Write("Maximum delay: ");
-            Console.WriteLine(Math.Max(timetable.CSMaxDelay, timetable.PRMaxDelay));
-            //Average total delay of a tram
-            Console.Write("Average delay: ");
-            Console.WriteLine((timetable.CSAverageDelay + timetable.PRAverageDelay) / 2);
-            //Percentage delays over one minut
-            Console.Write("Percentage trams met delay over 1 minuut: ");
-            Console.WriteLine((double)timetable.DelaysOverOneMinute / (double)trams.Count);
-            //Max waiting time of a person
-            Console.Write("Maximum waiting time: ");
-            Console.WriteLine(persons.Max(x => x.WaitingTime));
-            //Average waiting time of a person
-            Console.Write("Average waiting time: ");
-            Console.WriteLine(persons.Sum(x => x.WaitingTime) / persons.Count);
-            //Maximum travel time of a person
-            Console.Write("Maximum travel time of a person: ");
-            Console.WriteLine(persons.Max(x => x.LeaveTime - x.ArrivalTime));
-            //Average travel time of a person
-            Console.Write("Average travel time of a person: ");
-            Console.WriteLine(persons.Sum(x => x.LeaveTime - x.ArrivalTime) / persons.Count);
+            for (int i = 0; i < 100; i++)
+            {
+                Console.WriteLine("Start run " + (i + 1));
+                var results = sim.run(false, 20, 300, DayOfWeek.Monday, enterPrognoseA.Keys.ToArray());
+                var trams = results.Trams;
+                var timetable = results.TimeTable;
+                var persons = results.Persons.Values.ToList();
+                var stations = results.Stations;
 
+                //Maximum delay of a tram
+                csMaxDelays.Add(timetable.CSMaxDelay);
+                prMaxDelays.Add(timetable.PRMaxDelay);
+                //Average total delay of a tram
+                csAvgDelays.Add(timetable.CSAverageDelay);
+                prAvgDelays.Add(timetable.PRAverageDelay);
+                //Percentage delays over one minut
+                prcDelaysOverOneMinute.Add((double)timetable.DelaysOverOneMinute / timetable.NumberOfRounds);
+                //Max waiting time of a person
+                maxWaitTimes.Add(persons.Max(x => x.WaitingTime));
+                //Average waiting time of a person
+                avgWaitTimes.Add(persons.Sum(x => x.WaitingTime) / persons.Count);
+                //Maximum travel time of a person
+                maxTravelTimes.Add(persons.Max(x => x.LeaveTime - x.ArrivalTime));
+                //Average travel time of a person
+                avgTravelTimes.Add(persons.Sum(x => x.LeaveTime - x.ArrivalTime) / persons.Count);
+                //Maximum queue length
+                csMaxQueueSizes.Add(stations.Values.ToList().Max(x => x.MaxQueueLengthCS));
+                prMaxQueueSizes.Add(stations.Values.ToList().Max(x => x.MaxQueueLengthPR));
+            }
 
-            enterPrognoseA.Keys.ToList().ForEach(x => Console.WriteLine(x + ": " + persons.Where(y => y.ArrivedAt == x).Count()));
-            Console.WriteLine("-------------");
-            enterPrognoseA.Keys.ToList().ForEach(x => Console.WriteLine(x + ": " + persons.Where(y => y.LeftAt == x).Count()));
-            
-            //Number of people that never left or got on a tram. Also the reason why the above
-            //statistic is negative. TODO: figure out why there are so many passengers that never get on
-            //or leave a tram
-            Console.WriteLine(persons.Where(x => x.LeaveTime == 0).ToList().Count);
+            Console.WriteLine("Simulation completed. Start writing output");
+            Stream f = File.Create("output.txt");
+            using (StreamWriter sw = new StreamWriter(f))
+            {
 
+                sw.WriteLine(String.Join(",", csMaxDelays.Select(x => x.ToString())));
+                sw.WriteLine(String.Join(",", prMaxDelays.Select(x => x.ToString())));
+                sw.WriteLine(String.Join(",", csAvgDelays.Select(x => x.ToString())));
+                sw.WriteLine(String.Join(",", prAvgDelays.Select(x => x.ToString())));
+                sw.WriteLine(String.Join(",", prcDelaysOverOneMinute.Select(x => x.ToString())));
+                sw.WriteLine(String.Join(",", maxWaitTimes.Select(x => x.ToString())));
+                sw.WriteLine(String.Join(",", avgWaitTimes.Select(x => x.ToString())));
+                sw.WriteLine(String.Join(",", maxTravelTimes.Select(x => x.ToString())));
+                sw.WriteLine(String.Join(",", avgTravelTimes.Select(x => x.ToString())));
+                sw.WriteLine(String.Join(",", csMaxQueueSizes.Select(x => x.ToString())));
+                sw.WriteLine(String.Join(",", prMaxQueueSizes.Select(x => x.ToString())));
+            }
+            Console.WriteLine("Output has been written. Simulation over...");
             Console.ReadLine();
         }
     }

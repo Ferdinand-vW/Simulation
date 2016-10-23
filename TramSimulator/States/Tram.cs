@@ -34,11 +34,8 @@ namespace TramSimulator.States
         }
         public List<int> EmptyTram(double emptyRate)
         {
-            int count = PersonsOnTram.Count;
-            //Should be more random, but keeping it static for debugging purposes
-            int numLeave = (int)((double)PersonsOnTram.Count * emptyRate);
-            var personsLeaving = PersonsOnTram.Take(numLeave).ToList();
-            PersonsOnTram = PersonsOnTram.Skip(numLeave).ToList();
+            var personsLeaving = PersonsOnTram.Where(x => Generate.uniform(0, 1) < emptyRate).ToList();
+            PersonsOnTram = PersonsOnTram.Except(personsLeaving).ToList();
 
             return personsLeaving;
         }

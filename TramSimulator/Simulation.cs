@@ -107,7 +107,7 @@ namespace TramSimulator
                 //simState.Stations["CS"].WaitingTramsToCS.ToList().ForEach(x => Console.WriteLine(x));
                 if (e.GetType() != typeof(PersonArrival))
                 {
-                    simState.sw.WriteLine("Event " + n + ": " + e.ToString() + " " + simState.Stations["PR"].TramAtCS.HasValue + " " + simState.Stations["PR"].TramAtPR.HasValue
+                    /*simState.sw.WriteLine("Event " + n + ": " + e.ToString() + " " + simState.Stations["PR"].TramAtCS.HasValue + " " + simState.Stations["PR"].TramAtPR.HasValue
                     + " " + simState.Stations["CS"].TramAtCS.HasValue + " " + simState.Stations["CS"].TramAtPR.HasValue + " ID: ");
                     simState.Routes.CentralToPR.ForEach(x =>
                     {
@@ -129,14 +129,9 @@ namespace TramSimulator
                         }
                     });
                     simState.sw.WriteLine();
-                    simState.Stations.Values.ToList().ForEach(x => x.PrintQueues(simState));
+                    simState.Stations.Values.ToList().ForEach(x => x.PrintQueues(simState));*/
                 }
-                if(simState.Stations["PR"].EnterTrackQueue.Count > 0)
-                {
-                    //simState.sw.Close();
-                    
-                    Console.WriteLine("test");
-                }
+
                 e.execute(simState);
                 
                 n++;
@@ -174,7 +169,6 @@ namespace TramSimulator
             double totalRunTime = Constants.ONE_WAY_DRIVING_TIME * 2 + 2 * turnAroundTime;
             int numberOfTrams = (int)(totalRunTime / secondsPerTram);
             var trams = new Dictionary<int, Tram>();
-            Console.WriteLine("number of trams: {0}", numberOfTrams);
             var departureTimes = new double[numberOfTrams];
             for (int i = 0; i < numberOfTrams; i++)
             {

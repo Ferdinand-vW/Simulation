@@ -38,7 +38,7 @@ namespace TramSimulator
 
         public double TramArrivalRate(string depStation, string arrStation)
         {
-            return Generate.logNormalWitouthVariance(AvgTramArrival(depStation, arrStation));
+            return Generate.logNormalWithoutVariance(AvgTramArrival(depStation, arrStation));
         }
 
         public double AvgTramArrival(string depStation, string arrStation)
@@ -80,7 +80,7 @@ namespace TramSimulator
 
         public bool DoorMalfunction()
         {
-            return Generate.uniform(0, 100) < 5;
+            return Generate.uniform(0, 1) < 0.03;
         }
 
         public double TramEmptyRate(DayOfWeek day, string station, Routes.Dir dir, Tram tram, double time)
@@ -89,6 +89,14 @@ namespace TramSimulator
             //Percentage of people that leave the tram
             return (Routes.ToCS(dir) ? a.DepartPercentage(station)
                                      : b.DepartPercentage(station));
+        }
+
+        public double DwellTime(int pIn, int pOut, int transfer)
+        {
+            //var time = 23 * Math.Pow(10, -5) * Math.Pow(transfer, 2) * (pIn + pOut) * Constants.SECONDS_IN_HOUR;
+            var time = 12.5 + 0.22 * pIn + 0.13 * pOut;
+
+            return time;
         }
 
         public double TramEmptyTime(int npss)
@@ -101,10 +109,7 @@ namespace TramSimulator
             var waitingPersons = Routes.ToCS(tram.Direction) ? station.WaitingPersonsToCS
                                                              : station.WaitingPersonsToPR;
             var fill = Math.Min(Tram.CAPACITY - tram.PersonsOnTram.Count, waitingPersons.Count);
-            if(fill <= 0 && station.Name == "Vaartscherijn")
-            {
-                Console.WriteLine(waitingPersons.Count + " " + tram.PersonsOnTram.Count);
-            }
+
             return fill;
         }
 

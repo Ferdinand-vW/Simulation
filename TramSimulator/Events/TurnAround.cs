@@ -37,7 +37,9 @@ namespace TramSimulator.Events
             //sw.WriteLine("On tram " + _tramId + ": " + tram.PersonsOnTram.Count);
             //sw.WriteLine("exiting...");
             double emptyRate = rates.TramEmptyRate(simState.Day, _arrStation, tram.Direction, tram, StartTime);
+            var oldpersonCount = tram.PersonsOnTram.Count;
             var pplExited = tram.EmptyTram(emptyRate);
+            var transfer = oldpersonCount - pplExited.Count;
             //sw.WriteLine("On tram " + _tramId + ": " + tram.PersonsOnTram.Count);
 
             tram.Direction = TurnDirection(tram.Direction);
@@ -78,17 +80,12 @@ namespace TramSimulator.Events
                 //sw.WriteLine("\tLeft at is " + persons[x].LeaveTime);
                 //sw.WriteLine("\tTravel + wait time is " + (persons[x].LeaveTime - persons[x].ArrivalTime));
                 //sw.WriteLine("\tTravel time is " + (persons[x].LeaveTime - persons[x].EnteredTramTime));
-                if(persons[x].LeaveTime - persons[x].ArrivalTime > 5000)
-                {
-                    Person p = persons[x];
-                    Console.WriteLine();
-                }
             });
 
             //Add emptying and filling time of the tram
-            newTime += rates.TramEmptyTime(pplExited.Count) + rates.TramFillTime(fillRate);
+            newTime += rates.DwellTime(pplEntered.Count, pplExited.Count, transfer);
 
-            newTime = timetable.UpdateTimetable(_tramId, _arrStation, newTime + timetable.TurnAroundTime);
+            newTime = timetable.UpdateTimetable(_tramId, _arrStation, newTime + Constants.ACTUAL_TURNAROUND_TIME);
 
             //sw.WriteLine("Timetable: ");
             //sw.WriteLine("CS avg: " + timetable.CSAverageDelay);

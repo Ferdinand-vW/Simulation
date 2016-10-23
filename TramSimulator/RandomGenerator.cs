@@ -31,8 +31,8 @@ namespace TramSimulator
             //double lambda = (double)1 / u;
             return Math.Log(1 - Instance.random.NextDouble()) / (-u);
         }
-        public static double logNormalWitouthVariance(double mean) {
-            return logNormal(mean * 0.32, mean);
+        public static double logNormalWithoutVariance(double mean) {
+            return logNormal(mean * 1.578399, mean);
         }
 
         public static double logNormal(double variance, double mean)

@@ -20,6 +20,8 @@ namespace TramSimulator.States
         public int? TramAtPR { get; set; }
         public bool TramIsStationedCS { get; set; }
         public int? TramAtCS { get; set; }
+        public int MaxQueueLengthCS { get; set; }
+        public int MaxQueueLengthPR { get; set; }
         public int lastTramPR { get; set; }
         public int lastTramCS { get; set; }
 

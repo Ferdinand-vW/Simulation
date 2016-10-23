@@ -13,6 +13,8 @@ namespace TramSimulator.Events
     {
         //int _tramId;
         string _depStation;
+        public static int rounds;
+        public static int delayed;
 
         public TramExpectedDeparture(int tramId, string depStation, double startTime)
         {
@@ -64,7 +66,7 @@ namespace TramSimulator.Events
                 else //Tram was not able to depart and has to schedule new departure
                 {
                     double timeDiff = Constants.TIME_IN_BETWEEN - (Math.Ceiling(currTime - nextTram.DepartureTime));
-                    Console.WriteLine("Tram " + _tramId + " delayed by " + timeDiff + " at " + _depStation);
+                    delayed++;
                     eventQueue.AddEvent(new TramExpectedDeparture(_tramId, _depStation, StartTime + timeDiff));
                 }
             }
@@ -78,6 +80,7 @@ namespace TramSimulator.Events
                 simState.sw.WriteLine("");
                 HandleDepartureEvent(simState);
             }
+            rounds++;
         }
 
         private void HandleDepartureEvent(SimulationState simState)

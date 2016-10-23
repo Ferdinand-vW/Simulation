@@ -34,6 +34,8 @@ namespace TramSimulator.Events
                 p.QueueLengthAtArrival = station.WaitingPersonsToCS.Count;
                 persons.Add(pid,p);
                 station.WaitingPersonsToCS.Enqueue(pid);
+                if (station.WaitingPersonsToCS.Count > station.MaxQueueLengthCS)
+                { station.MaxQueueLengthCS = station.WaitingPersonsToCS.Count; }
             }
             else
             {
@@ -42,6 +44,8 @@ namespace TramSimulator.Events
                 p.QueueLengthAtArrival = station.WaitingPersonsToPR.Count;
                 persons.Add(pid, p);
                 station.WaitingPersonsToPR.Enqueue(pid);
+                if (station.WaitingPersonsToPR.Count > station.MaxQueueLengthPR)
+                { station.MaxQueueLengthPR = station.WaitingPersonsToPR.Count; }
             }
 
             if (!simState.Rates.nonZeroPercentage(StartTime, _stationName, _direction))
