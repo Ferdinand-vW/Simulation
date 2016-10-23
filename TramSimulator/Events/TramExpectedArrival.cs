@@ -28,6 +28,7 @@ namespace TramSimulator.Events
             var rates = simState.Rates;
             var routes = simState.Routes;
             var timetable = simState.TimeTable;
+            var sw = simState.sw;
             int nextTram = _tramId > 0 ? _tramId - 1 : simState.Trams.Count-1;
 
             double newTime = StartTime + 10;
@@ -61,28 +62,57 @@ namespace TramSimulator.Events
                         station.TramIsStationedCS = true;
                     }
 
+                    tram.Times.Add(Tuple.Create(StartTime, _arrStation));
+
                     tram.State = Tram.TramState.AtStation;
                     tram.Station = _arrStation;
 
-                    emptyRate = rates.TramEmptyRate(simState.Day, _arrStation, tram.Direction, tram, StartTime);
-                    fillRate = rates.TramFillRate(station, tram);
 
-                    var pplExited = tram.EmptyTram(emptyRate);
                     var waitingppl = Routes.ToPR(tram.Direction) ? station.WaitingPersonsToPR : station.WaitingPersonsToCS;
+
+                    emptyRate = rates.TramEmptyRate(simState.Day, _arrStation, tram.Direction, tram, StartTime);
+                    var pplExited = tram.EmptyTram(emptyRate);
+
+                    fillRate = rates.TramFillRate(station, tram);
+                   
+                    var oldwaitingppl = new Queue<int>(waitingppl);
+                    waitingppl.ToList().ForEach(x => persons[x].PassedTrams.Add(Tuple.Create(_tramId, tram.PersonsOnTram.Count)));
+                    var oldtramcount = new List<int>(tram.PersonsOnTram);
                     var pplEntered = tram.FillTram(waitingppl, fillRate);
+                    if(pplEntered.Count != oldwaitingppl.Count && (oldtramcount.Count < Tram.CAPACITY && Tram.CAPACITY - oldtramcount.Count != pplEntered.Count))
+                    {
+                        Console.WriteLine();
+                    }
                     //simState.sw.WriteLine("People entered: " + pplEntered.Count);
                     //simState.sw.WriteLine("People exited: " + pplExited.Count);
                     //simState.sw.WriteLine("Waiting people: " + waitingppl.Count);
                     //update waiting times
+                    //sw.WriteLine("Tram arrival time: " + StartTime);
                     pplEntered.ForEach(x =>
                     {
+                        //sw.WriteLine("---------ENTERING");
+                        //sw.WriteLine("\tPerson arrived at " + persons[x].ArrivalTime);
                         persons[x].SetWaitingTime(StartTime);
                         persons[x].ArrivedAt = _arrStation;
+                        persons[x].EnteredTramTime = StartTime;
+                       // sw.WriteLine("\tWaiting time is " + (StartTime - persons[x].ArrivalTime));
+                        //sw.WriteLine("\tWaiting time is " + persons[x].WaitingTime);
                     });
                     pplExited.ForEach(x =>
                     {
+                        //sw.WriteLine("---------LEAVING");
+                        //sw.WriteLine("\tPerson arrived at " + persons[x].ArrivalTime);
+                        //sw.WriteLine("\tPerson stepped in at " + persons[x].ArrivedAt);
                         persons[x].LeaveTime = StartTime;
                         persons[x].LeftAt = _arrStation;
+                        //sw.WriteLine("\tLeft at is " + persons[x].LeaveTime);
+                       // sw.WriteLine("\tTravel + wait time is " + (persons[x].LeaveTime - persons[x].ArrivalTime));
+                       // sw.WriteLine("\tTravel time is " + (persons[x].LeaveTime - persons[x].EnteredTramTime));
+                        if (persons[x].LeaveTime - persons[x].ArrivalTime > 5000)
+                        {
+                            Person p = persons[x];
+                            //Console.WriteLine();
+                        }
                     });
 
                     //Add emptying and filling time of the tram

@@ -91,7 +91,7 @@ namespace TramSimulator
             Console.WriteLine("Start simulation");
             Simulation sim = new Simulation(a,b);
             //debug, frequency, turnaroundtime, day, stations
-            var results = sim.run(false, 5, 120, DayOfWeek.Monday, enterPrognoseA.Keys.ToArray());
+            var results = sim.run(false, 20, 120, DayOfWeek.Monday, enterPrognoseA.Keys.ToArray());
 
             var trams = results.Trams;
             var timetable = results.TimeTable;
@@ -118,6 +118,11 @@ namespace TramSimulator
             //Average travel time of a person
             Console.Write("Average travel time of a person: ");
             Console.WriteLine(persons.Sum(x => x.LeaveTime - x.ArrivalTime) / persons.Count);
+
+
+            enterPrognoseA.Keys.ToList().ForEach(x => Console.WriteLine(x + ": " + persons.Where(y => y.ArrivedAt == x).Count()));
+            Console.WriteLine("-------------");
+            enterPrognoseA.Keys.ToList().ForEach(x => Console.WriteLine(x + ": " + persons.Where(y => y.LeftAt == x).Count()));
             
             //Number of people that never left or got on a tram. Also the reason why the above
             //statistic is negative. TODO: figure out why there are so many passengers that never get on

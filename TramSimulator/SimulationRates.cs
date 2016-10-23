@@ -80,7 +80,7 @@ namespace TramSimulator
 
         public bool DoorMalfunction()
         {
-            return Generate.uniform(0, 5) < 1;
+            return Generate.uniform(0, 100) < 5;
         }
 
         public double TramEmptyRate(DayOfWeek day, string station, Routes.Dir dir, Tram tram, double time)
@@ -93,19 +93,24 @@ namespace TramSimulator
 
         public double TramEmptyTime(int npss)
         {
-            return ((double)npss / (double)Tram.CAPACITY) * 60;
+            return ((double)npss / (double)Tram.CAPACITY) * 1;
         }
 
         public int TramFillRate(Station station, Tram tram)
         {
             var waitingPersons = Routes.ToCS(tram.Direction) ? station.WaitingPersonsToCS
                                                              : station.WaitingPersonsToPR;
-            return Math.Min(Tram.CAPACITY - tram.PersonsOnTram.Count, waitingPersons.Count);
+            var fill = Math.Min(Tram.CAPACITY - tram.PersonsOnTram.Count, waitingPersons.Count);
+            if(fill <= 0 && station.Name == "Vaartscherijn")
+            {
+                Console.WriteLine(waitingPersons.Count + " " + tram.PersonsOnTram.Count);
+            }
+            return fill;
         }
 
         public double TramFillTime(int npss)
         {
-            return ((double)npss / (double)Tram.CAPACITY) * 60;
+            return ((double)npss / (double)Tram.CAPACITY) * 1;
         }
 
 

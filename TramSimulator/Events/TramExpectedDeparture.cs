@@ -64,7 +64,7 @@ namespace TramSimulator.Events
                 else //Tram was not able to depart and has to schedule new departure
                 {
                     double timeDiff = Constants.TIME_IN_BETWEEN - (Math.Ceiling(currTime - nextTram.DepartureTime));
-
+                    Console.WriteLine("Tram " + _tramId + " delayed by " + timeDiff + " at " + _depStation);
                     eventQueue.AddEvent(new TramExpectedDeparture(_tramId, _depStation, StartTime + timeDiff));
                 }
             }

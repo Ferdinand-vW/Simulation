@@ -20,7 +20,8 @@ namespace TramSimulator
             {
                 return DelaysAboveOneMinutePR.Values.
                        Zip(DelaysAboveOneMinuteCS.Values, (x, y) => Tuple.Create(x,y)).
-                       Select(x => x.Item1 + x.Item2).ToList().Count;
+                       Select(x => x.Item1 + x.Item2).
+                       Where(x => x > 0).ToList().Count;
             }
         }
         public int NumberOfRounds { get; set; }

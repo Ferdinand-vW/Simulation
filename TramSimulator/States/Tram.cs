@@ -21,6 +21,7 @@ namespace TramSimulator.States
         public double DepartureTime { get; set; }
         public List<int> PersonsOnTram { get; set; }
         public Routes.Dir Direction { get; set; }
+        public List<Tuple<double,string>> Times { get; set; }
 
         public Tram(int tramId, double departureTime)
         {
@@ -28,6 +29,7 @@ namespace TramSimulator.States
             this.DepartureTime = departureTime;
             this.PersonsOnTram = new List<int>();
             this.Direction = Routes.Dir.ToCS;
+            this.Times = new List<Tuple<double,string>>();
 
         }
         public List<int> EmptyTram(double emptyRate)

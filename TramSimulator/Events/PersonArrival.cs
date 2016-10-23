@@ -30,13 +30,17 @@ namespace TramSimulator.Events
             if(_direction == Routes.Dir.ToCS)
             {
                 int pid = persons.Count;
-                persons.Add(pid, new Person(pid, StartTime));
+                Person p = new Person(pid, StartTime);
+                p.QueueLengthAtArrival = station.WaitingPersonsToCS.Count;
+                persons.Add(pid,p);
                 station.WaitingPersonsToCS.Enqueue(pid);
             }
             else
             {
                 int pid = persons.Count;
-                persons.Add(pid, new Person(pid, StartTime));
+                Person p = new Person(pid, StartTime);
+                p.QueueLengthAtArrival = station.WaitingPersonsToPR.Count;
+                persons.Add(pid, p);
                 station.WaitingPersonsToPR.Enqueue(pid);
             }
 
