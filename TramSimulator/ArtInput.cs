@@ -71,7 +71,7 @@ namespace TramSimulator
                 else {
                     string prevStation = stationsCSPR[index - 1];
                     // The amount of people got off and on the tram at the previous station
-                    double extraPersons = (CSPR[prevStation].passOut(time) + CSPR[prevStation].passIn(time));
+                    double extraPersons = ((-CSPR[prevStation].passOut(time)) + CSPR[prevStation].passIn(time));
                     // The amount of people on the train is calculated 
                     //with the amout of people where on the train at the previous station
                     return extraPersons + (onTrain(prevStation, time, dir));
@@ -82,7 +82,7 @@ namespace TramSimulator
                 if (index == 0) return 0;
                 else {
                     string prevStation = stationsPRCS[index - 1];
-                    double extraPersons = (PRCS[prevStation].passOut(time) + PRCS[prevStation].passIn(time));
+                    double extraPersons = ((-PRCS[prevStation].passOut(time)) + PRCS[prevStation].passIn(time));
                     return extraPersons + (onTrain(prevStation, time, dir));
                 }
             }
