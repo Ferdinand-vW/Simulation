@@ -7,26 +7,22 @@ using System.IO;
 
 using TramSimulator.Events;
 using TramSimulator.States;
+using System.Runtime.Serialization.Formatters.Binary;
 
 namespace TramSimulator
 {
 
     public class Simulation
     {
-        Data a;
-        Data b;
+
         int i = 0;
 
-        public Simulation(Data a, Data b)
+        public SimulationState run(bool debug, int tramFrequency, int turnAroundTime, DayOfWeek dayOfWeek, string[] stationNames, AbstractSimulationRates rates)
         {
-            this.a = a;
-            this.b = b;
-        }
-
-        public SimulationState run(bool debug, int tramFrequency, int turnAroundTime, DayOfWeek dayOfWeek, string[] stationNames)
-        {
-            SimulationState simState = Setup(tramFrequency, turnAroundTime, Constants.BEGIN_TIME, stationNames,dayOfWeek);
+            SimulationState simState = Setup(tramFrequency, turnAroundTime, Constants.BEGIN_TIME, stationNames,dayOfWeek, rates);
             int n = 0;
+            Event e = null;
+            StreamWriter sw = new StreamWriter("test.txt");
             while (simState.EventQueue.HasEvent())
             {
 
@@ -36,7 +32,7 @@ namespace TramSimulator
                 var centralToPR = simState.Routes.CentralToPR;
                 var prToCentral = simState.Routes.PRToCentral;
                 var eventQueue = simState.EventQueue;
-                if (debug)
+                if (debug && i != 0 && e.EType != Event.EventType.Other)
                 {
                     for (int i = 0; i < stations.Count; i++)
                     {
@@ -84,67 +80,83 @@ namespace TramSimulator
                             (x.Name + " to PR: " + tramList);
                         }
                     });
-                    Console.WriteLine("Tram directions");
-                    simState.Trams.ToList().ForEach(x =>
-                    {
-                        Console.WriteLine(x.Key + ": " + x.Value.Direction.ToString());
-                    });
-                    var eventQueueSorted = eventQueue.EventList.OrderBy(x => x.StartTime).ToList();
-
-                    Console.WriteLine("Current scheduled events: ");
-                    eventQueueSorted.ForEach(x => Console.WriteLine("\t event: " + x.ToString()));
-
+                    
+                    
                     Console.ReadLine();
                 }
 
-                Event e = simState.EventQueue.Next();
+                e = simState.EventQueue.Next();
+                if(simState.Stations.Values.Any(x => x.WaitingTramsToCS.Distinct().Count() != x.WaitingTramsToCS.Count 
+                || x.WaitingTramsToPR.Distinct().Count() != x.WaitingTramsToPR.Count))
+                {
+                    Console.WriteLine();
+                }
                 var tracks2 = simState.Routes.CentralToPR.Union(simState.Routes.PRToCentral).ToList();
                 i++;
                 
 
                 //At 9PM we shut down the simulation
                 if(e.StartTime > Constants.END_TIME) { break; }
+                e.execute(simState);
                 //simState.Stations["CS"].WaitingTramsToCS.ToList().ForEach(x => Console.WriteLine(x));
                 if (e.GetType() != typeof(PersonArrival))
                 {
-                    /*simState.sw.WriteLine("Event " + n + ": " + e.ToString() + " " + simState.Stations["PR"].TramAtCS.HasValue + " " + simState.Stations["PR"].TramAtPR.HasValue
+                    sw.WriteLine("Event " + n + ": " + e.ToString() + " " + simState.Stations["PR"].TramAtCS.HasValue + " " + simState.Stations["PR"].TramAtPR.HasValue
                     + " " + simState.Stations["CS"].TramAtCS.HasValue + " " + simState.Stations["CS"].TramAtPR.HasValue + " ID: ");
                     simState.Routes.CentralToPR.ForEach(x =>
                     {
-                        simState.sw.Write(x.From + " " + x.To + ": ");
-                        x.Trams.ForEach(y => simState.sw.Write(y + " "));
-                        simState.sw.WriteLine();
+                        sw.Write(x.From + " " + x.To + ": ");
+                        x.Trams.ForEach(y => sw.Write(y + " "));
+                        sw.WriteLine();
                     });
                     simState.Routes.PRToCentral.ForEach(x =>
                     {
-                        simState.sw.Write(x.From + " " + x.To + ": ");
-                        x.Trams.ForEach(y => simState.sw.Write(y + " "));
-                        simState.sw.WriteLine();
+                        sw.Write(x.From + " " + x.To + ": ");
+                        x.Trams.ForEach(y => sw.Write(y + " "));
+                        sw.WriteLine();
                     });
                     simState.Trams.Values.ToList().ForEach(x =>
                     {
                         if(x.State == Tram.TramState.AtStation)
                         {
-                            simState.sw.WriteLine(x.Station + " " + x.TramId);
+                            sw.WriteLine(x.Station + " " + x.TramId);
                         }
                     });
-                    simState.sw.WriteLine();
-                    simState.Stations.Values.ToList().ForEach(x => x.PrintQueues(simState));*/
+                    sw.WriteLine();
+                    simState.Stations.Values.ToList().ForEach(x => x.PrintQueues(simState));
                 }
 
-                e.execute(simState);
+                //var routeOld = simState.Routes.DeepClone<Routes>();
                 
+                Console.WriteLine(e.ToString());
+                //e.Snapshot = simState.DeepClone();
+                simState.HandledEvents.Add(e);
+
+                var routeNew = simState.Routes;
+                if (e.EType == Event.EventType.TramDeparture)
+                {
+                    Track t = routeNew.GetTrack(e._tramId);
+                    Track t2 = routeNew.GetTrack(e._tramId);
+                    if(t.To != t2.From && (t.From != t2.From || t.To != t2.To))
+                    {
+                        Console.WriteLine();
+                    }
+                }
+
+                if(Double.IsNaN(e.StartTime))
+                {
+                    Console.WriteLine();
+                }
+
                 n++;
             }
-
-            simState.sw.Close();
+            sw.Close();
 
             return simState;
         }
 
-        public SimulationState Setup(int tramFrequency, int turnAroundTime, double startTime, string[] stationNames,DayOfWeek day)
+        public SimulationState Setup(int tramFrequency, int turnAroundTime, double startTime, string[] stationNames,DayOfWeek day, AbstractSimulationRates rates)
         {
-            var rates = new SimulationRates(a,b,day);
 
             EventQueue eventQueue = new EventQueue();
             var stations = new Dictionary<string, Station>();
@@ -155,14 +167,8 @@ namespace TramSimulator
 
                 //Only generate personarrival events for stations
                 //where persons actually arrive
-                if (a.EnteringTotal(day, stationNames[i]) != 0)
-                {
-                    eventQueue.AddEvent(new ZeroPersonArrival(startTime, stationNames[i], Routes.Dir.ToCS));
-                }
-                if (b.EnteringTotal(day, stationNames[i]) != 0)
-                {
-                    eventQueue.AddEvent(new ZeroPersonArrival(startTime, stationNames[i], Routes.Dir.ToPR));
-                }
+                eventQueue.AddEvent(new ZeroPersonArrival(startTime, stationNames[i], Routes.Dir.ToCS));
+                eventQueue.AddEvent(new ZeroPersonArrival(startTime, stationNames[i], Routes.Dir.ToPR));
             }
 
             double secondsPerTram = (double)Constants.SECONDS_IN_HOUR / tramFrequency;
@@ -175,7 +181,7 @@ namespace TramSimulator
                 trams[i] = new Tram(i, 0);
                 trams[i].Station = stationNames[0];
                 trams[i].State = Tram.TramState.AtShuntyard;
-                departureTimes[i] = secondsPerTram * i + Constants.BEGIN_TIME - Constants.SECONDS_IN_HOUR;
+                departureTimes[i] = secondsPerTram * i + Constants.BEGIN_TIME;
                 eventQueue.AddEvent(new EnterTrack(i, stations.Values.ToArray()[0].Name, departureTimes[i]));
             }
 
@@ -188,9 +194,7 @@ namespace TramSimulator
 
             var timeTable = new TimeTable(startTime, turnAroundTime, trams.Keys.ToArray(), departureTimes);
 
-            Stream f = File.Create("test.txt");
-            StreamWriter sw = new StreamWriter(f);
-            return new SimulationState(trams, stations, eventQueue, routes, rates, timeTable, day, sw);
+            return new SimulationState(trams, stations, eventQueue, routes, rates, timeTable, day);
         }
 
         static public List<Track> GenerateRoute(string[] stationNames)
@@ -205,8 +209,22 @@ namespace TramSimulator
 
             return route;
         }
-        
-        
+
+    }
+
+    public static class ExtensionMethods
+    {
+        // Deep clone
+        public static T DeepClone<T>(this T a)
+        {
+            using (MemoryStream stream = new MemoryStream())
+            {
+                BinaryFormatter formatter = new BinaryFormatter();
+                formatter.Serialize(stream, a);
+                stream.Position = 0;
+                return (T)formatter.Deserialize(stream);
+            }
+        }
     }
 
 }

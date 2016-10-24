@@ -7,7 +7,7 @@ using TramSimulator.States;
 
 namespace TramSimulator.Events
 {
-
+    [Serializable]
     class ZeroPersonArrival : Event
     {
         string _stationName;
@@ -17,6 +17,7 @@ namespace TramSimulator.Events
             this.StartTime = startTime;
             this._direction = dir;
             this._stationName = stationName;
+            this.EType = EventType.Other;
         }
         public override void execute(SimulationState simState)
         {

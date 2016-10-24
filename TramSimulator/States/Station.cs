@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 
 namespace TramSimulator.States
 {
+    [Serializable]
     public class Station
     {
         readonly String _name;
@@ -46,36 +47,8 @@ namespace TramSimulator.States
 
         public void PrintQueues(SimulationState simState)
         {
-            var sw = simState.sw;
 
-            if (WaitingTramsToPR.Count > 0)
-            {
-                sw.Write("Waiting Trams to PR: ");
-                WaitingTramsToPR.ToList().ForEach(x => sw.WriteLine(x + " "));
-                sw.WriteLine();
-            }
-
-            if (WaitingTramsToCS.Count > 0)
-            {
-                sw.Write("Waiting Trams to CS: ");
-                WaitingTramsToCS.ToList().ForEach(x => sw.Write(x + " "));
-                sw.WriteLine();
-            }
-
-            if (EnterTrackQueue.Count > 0)
-            {
-                sw.Write("Waiting Trams to EnterTrack: ");
-                EnterTrackQueue.ToList().ForEach(x => sw.Write(x + " "));
-                sw.WriteLine();
-            }
-
-            if(WaitingTramsToCS.Count == 0 && WaitingTramsToPR.Count == 0 && EnterTrackQueue.Count == 0)
-            {
-                sw.WriteLine("All queues are empty");
-            }
-
-            //sw.WriteLine("Station " + Name + ": " + WaitingPersonsToPR.Count + " " + WaitingPersonsToCS.Count);
-
+           
         }
         
     }

@@ -85,9 +85,42 @@ namespace TramSimulator
             Data b = new Data(enterPrognoseB, exitPrognoseB);
             passengerCountsA.ForEach(x => a.AddPC(x));
             passengerCountsB.ForEach(x => b.AddPC(x));
+            string[] stations = enterPrognoseA.Keys.ToArray();
+
+            Stream f1 = File.Open("../../input-data-passengers-01.csv", FileMode.Open);
+            ArtInput f1A = Parser.ParseArtInput(f1, stations);
+            Console.WriteLine(f1A.PRCS.Count);
+            Stream f15 = File.Open("../../input-data-passengers-015.csv", FileMode.Open);
+            ArtInput f15A = Parser.ParseArtInput(f15, stations);
+            Stream f2 = File.Open("../../input-data-passengers-02.csv", FileMode.Open);
+            ArtInput f2A = Parser.ParseArtInput(f2, stations);
+            Stream f25 = File.Open("../../input-data-passengers-025.csv", FileMode.Open);
+            ArtInput f25A = Parser.ParseArtInput(f25, stations);
+            Stream f3 = File.Open("../../input-data-passengers-03.csv", FileMode.Open);
+            ArtInput f3A = Parser.ParseArtInput(f3, stations);
+            Stream f4 = File.Open("../../input-data-passengers-04.csv", FileMode.Open);
+            ArtInput f4A = Parser.ParseArtInput(f4, stations);
+            Stream f6 = File.Open("../../input-data-passengers-06.csv", FileMode.Open);
+            ArtInput f6A = Parser.ParseArtInput(f6, stations);
 
             Console.WriteLine("Finished reading passengercount data");
-            Simulation sim = new Simulation(a,b);
+
+            RunSimulation("realistic.txt", new SimulationRates(a, b, DayOfWeek.Wednesday), stations);
+            /*RunSimulation("File1.txt", new ArtificialRates(f1A), stations);
+            RunSimulation("File15.txt", new ArtificialRates(f15A), stations);
+            RunSimulation("File2.txt", new ArtificialRates(f2A), stations);
+            RunSimulation("File25.txt", new ArtificialRates(f25A), stations);
+            RunSimulation("File3.txt", new ArtificialRates(f3A), stations);
+            RunSimulation("File4.txt", new ArtificialRates(f4A), stations);
+            RunSimulation("File6.txt", new ArtificialRates(f6A), stations);*/
+
+
+            Console.ReadLine();
+        }
+
+        public static void RunSimulation(string filename, AbstractSimulationRates rates, string[] stationsArr)
+        {
+            Simulation sim = new Simulation();
             //debug, frequency, turnaroundtime, day, stations
 
             List<double> csMaxDelays = new List<double>();
@@ -101,12 +134,12 @@ namespace TramSimulator
             List<double> avgTravelTimes = new List<double>();
             List<double> csMaxQueueSizes = new List<double>();
             List<double> prMaxQueueSizes = new List<double>();
-            Console.WriteLine("Start simulation");
+            Console.WriteLine("Start simulation " + filename);
 
-            for (int i = 0; i < 100; i++)
+            for (int i = 0; i < 10; i++)
             {
                 Console.WriteLine("Start run " + (i + 1));
-                var results = sim.run(false, 20, 300, DayOfWeek.Monday, enterPrognoseA.Keys.ToArray());
+                var results = sim.run(false, 12, 240, DayOfWeek.Wednesday, stationsArr, rates);
                 var trams = results.Trams;
                 var timetable = results.TimeTable;
                 var persons = results.Persons.Values.ToList();
@@ -118,7 +151,7 @@ namespace TramSimulator
                 //Average total delay of a tram
                 csAvgDelays.Add(timetable.CSAverageDelay);
                 prAvgDelays.Add(timetable.PRAverageDelay);
-                //Percentage delays over one minut
+                //Percentage delays over one minute
                 prcDelaysOverOneMinute.Add((double)timetable.DelaysOverOneMinute / timetable.NumberOfRounds);
                 //Max waiting time of a person
                 maxWaitTimes.Add(persons.Max(x => x.WaitingTime));
@@ -134,7 +167,7 @@ namespace TramSimulator
             }
 
             Console.WriteLine("Simulation completed. Start writing output");
-            Stream f = File.Create("output.txt");
+            Stream f = File.Create(filename);
             using (StreamWriter sw = new StreamWriter(f))
             {
 
@@ -151,7 +184,6 @@ namespace TramSimulator
                 sw.WriteLine(String.Join(",", prMaxQueueSizes.Select(x => x.ToString())));
             }
             Console.WriteLine("Output has been written. Simulation over...");
-            Console.ReadLine();
         }
     }
 }

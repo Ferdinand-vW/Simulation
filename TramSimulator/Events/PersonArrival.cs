@@ -10,6 +10,7 @@ namespace TramSimulator.Events
 {
     //event voor als een persoon aan komt op een bepaald station
     //creert ook de event voor de volgende 
+    [Serializable]
     public class PersonArrival : Event
     {
         string _stationName;
@@ -20,13 +21,13 @@ namespace TramSimulator.Events
             this.StartTime = startTime;
             this._direction = dir;
             this._stationName = stationName;
+            this.EType = EventType.Other;
         }
         public override void execute(SimulationState simState)
         {
             Station station = simState.Stations[_stationName];
             var persons = simState.Persons;
             simState.counter++;
-            simState.sw.WriteLine("persons: " + simState.counter);
             if(_direction == Routes.Dir.ToCS)
             {
                 int pid = persons.Count;

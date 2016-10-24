@@ -9,6 +9,7 @@ using TramSimulator.States;
 namespace TramSimulator.Events
 {
     //event voor tram expected arrival
+    [Serializable]
     public class TramExpectedArrival : Event
     {
         //int _tramId;
@@ -19,34 +20,61 @@ namespace TramSimulator.Events
             this._tramId = tramId;
             this._arrStation = arrStation;
             this.StartTime = startTime;
+            this.EType = EventType.TramArrival;
+            this.Station = arrStation;
         }
         public override void execute(SimulationState simState)
         {
+            Track tc = simState.Routes.GetTrack(_tramId);
+            if (tc.To != _arrStation)
+            {
+                Console.WriteLine();
+            }
             var station = simState.Stations[_arrStation];
             var tram = simState.Trams[_tramId];
             var persons = simState.Persons;
             var rates = simState.Rates;
             var routes = simState.Routes;
             var timetable = simState.TimeTable;
-            var sw = simState.sw;
             int nextTram = _tramId > 0 ? _tramId - 1 : simState.Trams.Count-1;
 
             double newTime = StartTime;
             int fillRate = 0;
             double emptyRate = 0;
-
-            if(_arrStation == Constants.PR || _arrStation == Constants.CS)
+            
+            
+            if (_arrStation == Constants.PR || _arrStation == Constants.CS)
             {
                 HandleEndStationEvent(simState);
+                if (simState.Stations["PR"].TramAtPR == 2 && simState.Stations["PR"].WaitingTramsToPR.Contains(2))
+                {
+                    Console.WriteLine();
+                }
             }
             else
             {
                 if(Routes.ToPR(tram.Direction) && station.TramIsStationedPR)
                 {
+                    if (simState.Stations["PR"].TramAtPR != 2 && simState.Stations["PR"].WaitingTramsToPR.Contains(2))
+                    {
+                        Console.WriteLine();
+                    }
+                    if (station.WaitingTramsToPR.Contains(_tramId))
+                    {
+                        Console.WriteLine();
+                    }
                     station.WaitingTramsToPR.Enqueue(_tramId);
+                    if (simState.Stations["PR"].TramAtPR == 2 && simState.Stations["PR"].WaitingTramsToPR.Contains(2))
+                    {
+                        Console.WriteLine();
+                    }
                 }
                 else if(Routes.ToCS(tram.Direction) && station.TramIsStationedCS)
                 {
+                    if(station.WaitingTramsToCS.Contains(_tramId))
+                    {
+                        Console.WriteLine();
+                    }
                     station.WaitingTramsToCS.Enqueue(_tramId);
                 }
                 else
@@ -119,6 +147,11 @@ namespace TramSimulator.Events
                     var waitingtrams = Routes.ToCS(tram.Direction) ? station.WaitingTramsToCS : station.WaitingTramsToPR;
                     if(waitingtrams.Count > 0 && waitingtrams.Peek() == _tramId) { waitingtrams.Dequeue(); }
 
+                    Track cT = simState.Routes.GetTrack(_tramId);
+                    if (cT.To != _arrStation || (simState.Stations["PR"].TramAtPR == 2 && simState.Stations["PR"].WaitingTramsToPR.Contains(2)))
+                    {
+                        Console.WriteLine();
+                    }
                     Event e = new TramExpectedDeparture(_tramId, _arrStation, newTime);
                     simState.EventQueue.AddEvent(e);
                 }
@@ -135,13 +168,34 @@ namespace TramSimulator.Events
 
             var waitingtrams = _arrStation == Constants.PR ? station.WaitingTramsToPR : station.WaitingTramsToCS;
 
-            if((waitingtrams.Count > 0 && waitingtrams.Peek() != _tramId)|| (station.TramAtPR.HasValue && station.TramAtCS.HasValue) || station.EnterTrackQueue.Count > 0)
+            if(station.TramAtPR == 14 && station.TramAtCS.HasValue && _tramId == 2 && _arrStation == "PR" && waitingtrams.Count == 0)
             {
-                waitingtrams.Enqueue(_tramId);
+                Console.WriteLine();
+            }
+            if(((waitingtrams.Count > 0 && waitingtrams.Peek() != _tramId) || (station.TramAtPR.HasValue && station.TramAtCS.HasValue) || station.EnterTrackQueue.Count > 0))
+            {
+                if (waitingtrams.Contains(_tramId))
+                {
+                    Console.WriteLine();
+                }
+                if(_tramId == 2 && _arrStation == "PR")
+                {
+                    Console.WriteLine();
+                }
+                if (!waitingtrams.Contains(_tramId))
+                { waitingtrams.Enqueue(_tramId); }
+                
+                
+                var t = simState.Stations[_arrStation].TramAtPR;
+                var wait = simState.Stations[_arrStation].WaitingTramsToPR;
+                if (simState.Stations["PR"].TramAtPR == 2 && simState.Stations["PR"].WaitingTramsToPR.Contains(2))
+                {
+                    Console.WriteLine();
+                }
             }
             else
             {
-                if(!station.TramAtPR.HasValue)
+                if (!station.TramAtPR.HasValue)
                 {
                     station.TramAtPR = _tramId;
                     station.TramIsStationedPR = true;
@@ -151,11 +205,22 @@ namespace TramSimulator.Events
                     station.TramAtCS = _tramId;
                     station.TramIsStationedCS = true;
                 }
+                
+                var waits = waitingtrams.DeepClone();
                 //The only way to get to this point is if the tram is still at the head of the queue. 
                 //We've now set that this tram is at this station, so we can remove him from the queue.
-                if(waitingtrams.Count > 0)
+                if (waitingtrams.Count > 0)
                 { waitingtrams.Dequeue(); }
-                
+                Track tc = simState.Routes.GetTrack(_tramId);
+                if(tc.To != _arrStation)
+                {
+                    Console.WriteLine();
+                }
+
+                if (simState.Stations["PR"].TramAtPR == 2 && simState.Stations["PR"].WaitingTramsToPR.Contains(2))
+                {
+                    Console.WriteLine();
+                }
                 simState.EventQueue.AddEvent(new TurnAround(_tramId, _arrStation, StartTime));
             }
         }

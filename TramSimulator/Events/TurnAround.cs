@@ -6,6 +6,7 @@ using TramSimulator.States;
 
 namespace TramSimulator.Events
 {
+    [Serializable]
     class TurnAround : Event
     {
         //int _tramId;
@@ -16,6 +17,8 @@ namespace TramSimulator.Events
             this._tramId = tramId;
             this._arrStation = arrStation;
             this.StartTime = startTime;
+            this.EType = EventType.TurnAround;
+            this.Station = arrStation;
         }
 
         public override void execute(SimulationState simState)
@@ -23,12 +26,12 @@ namespace TramSimulator.Events
             var tram = simState.Trams[_tramId];
             var station = simState.Stations[_arrStation];
             var timetable = simState.TimeTable;
+            var routes = simState.Routes;
 
             tram.State = Tram.TramState.AtStation;
             tram.Station = _arrStation;
             var persons = simState.Persons;
             var rates = simState.Rates;
-            var sw = simState.sw;
 
             //GenerateEventForWaitingTram(simState);
             //Update the timetable and get the new expected departuretime
@@ -43,8 +46,18 @@ namespace TramSimulator.Events
             //sw.WriteLine("On tram " + _tramId + ": " + tram.PersonsOnTram.Count);
 
             tram.Direction = TurnDirection(tram.Direction);
+            Track cT = simState.Routes.GetTrack(_tramId);
+            if(cT.From == _arrStation)
+            {
+                Console.WriteLine();
+            }
+            routes.MoveToNextTrack(_tramId, _arrStation, simState);
+            Track t2 = routes.GetTrack(_tramId);
+            if((_arrStation == "PR" && t2.From != "PR") || (_arrStation == "CS" && t2.From != "CS") || (t2.From != "PR" && t2.From != "CS"))
+            {
+                Console.WriteLine();
+            }
             //sw.Write("Tram times: ");
-            tram.Times.ForEach(x => sw.WriteLine(x + " "));
             //sw.WriteLine();
             tram.Times = new List<Tuple<double,string>>();
 
@@ -96,9 +109,10 @@ namespace TramSimulator.Events
             //Add delay time if doors were shut
             //if (rates.DoorMalfunction()) { newTime += Constants.SECONDS_IN_MINUTE; }
 
-
-            if (newTime <= 0) { throw new Exception("test"); }
-            simState.sw.WriteLine("Generated departure for " + _tramId + " at " + newTime);
+            if (cT.From == _arrStation)
+            {
+                Console.WriteLine();
+            }
             simState.EventQueue.AddEvent(new TramExpectedDeparture(_tramId, _arrStation, newTime));
         }
 

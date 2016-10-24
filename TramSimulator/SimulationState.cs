@@ -10,6 +10,7 @@ using TramSimulator.Events;
 
 namespace TramSimulator
 {
+    [Serializable]
     public class SimulationState
     {
         public Dictionary<int, Tram> Trams { get; private set; }
@@ -17,17 +18,16 @@ namespace TramSimulator
         public Dictionary<int, Person> Persons { get; private set; }
         public EventQueue EventQueue { get; private set; }
         public Routes Routes { get; set; }
-        public SimulationRates Rates {get;set;}
+        public AbstractSimulationRates Rates {get;set;}
         public TimeTable TimeTable { get; set; }
         public DayOfWeek Day { get; set; }
         public int counter { get; set; }
-
-        public StreamWriter sw;
+        public List<Event> HandledEvents { get; set; }
 
 
         public SimulationState(Dictionary<int, Tram> trams, Dictionary<string, Station> stations, 
-                               EventQueue eventQueue, Routes routes, SimulationRates rates, 
-                               TimeTable timeTable, DayOfWeek day, StreamWriter sw)
+                               EventQueue eventQueue, Routes routes, AbstractSimulationRates rates, 
+                               TimeTable timeTable, DayOfWeek day)
         {
             this.Trams = trams;
             this.Stations = stations;
@@ -37,7 +37,8 @@ namespace TramSimulator
             this.Rates = rates;
             this.TimeTable = timeTable;
             this.Day = day;
-            this.sw = sw;
+            
+            this.HandledEvents = new List<Event>();
         }
     }
 }

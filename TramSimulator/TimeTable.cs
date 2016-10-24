@@ -8,34 +8,24 @@ using TramSimulator.States;
 
 namespace TramSimulator
 {
+    [Serializable]
     public class TimeTable
     {
         public double PRAverageDelay { get { return DelaysAtPR.Values.SelectMany(x => x).Sum() / DelaysAtPR.Values.SelectMany(x => x).Count(); } }
         public double PRMaxDelay { get { return DelaysAtPR.Values.SelectMany(x => x).Max(); } }
         public double CSAverageDelay { get { return DelaysAtCS.Values.SelectMany(x => x).Sum() / DelaysAtCS.Values.SelectMany(x => x).Count(); } }
         public double CSMaxDelay { get { return DelaysAtCS.Values.SelectMany(x => x).Max(); } }
-        public int DelaysOverOneMinute
-        {
-            get
-            {
-                return DelaysAboveOneMinutePR.Values.
-                        Union(DelaysAboveOneMinuteCS.Values).
-                        Where(x => x > 0).ToList().Count;
-            }
-        }
+        public int DelaysOverOneMinute { get; set; }
         public int NumberOfRounds { get; set; }
         public int TurnAroundTime { get; set; }
 
         Dictionary<int, double> _expectedDepartureTimes;
         Dictionary<int, List<double>> DelaysAtPR { get; set; }
         Dictionary<int, List<double>> DelaysAtCS { get; set; }
-        Dictionary<int, int> DelaysAboveOneMinutePR { get; set; }
-        Dictionary<int, int> DelaysAboveOneMinuteCS { get; set; }
 
 
         public TimeTable(double startTime, int turnAroundTime, int[] tramIds, double[] departureTimes)
         {
-            this.NumberOfRounds = 0;
             this.TurnAroundTime = turnAroundTime;
             this._expectedDepartureTimes = tramIds.Zip(departureTimes, (k,v) => new { k, v})
                                                   .ToDictionary(x => x.k, x => x.v);
@@ -44,8 +34,6 @@ namespace TramSimulator
             DelaysAtPR.Keys.ToList().ForEach(x => DelaysAtPR[x].Add(0));
             this.DelaysAtCS = tramIds.ToDictionary(x => x, x => new List<double>());
             DelaysAtCS.Keys.ToList().ForEach(x => DelaysAtCS[x].Add(0));
-            this.DelaysAboveOneMinutePR = tramIds.Select(x => Tuple.Create(x, 0)).ToDictionary(x => x.Item1, x => x.Item2);
-            this.DelaysAboveOneMinuteCS = tramIds.Select(x => Tuple.Create(x, 0)).ToDictionary(x => x.Item1, x => x.Item2);
             //renewTimeTable(startTime);
         }
 
@@ -78,11 +66,7 @@ namespace TramSimulator
             if (delay >= Constants.SECONDS_IN_MINUTE) { moreThanAMinute = true; }
 
             //Increase the number of delays above one minute for this tram
-            if (moreThanAMinute)
-            {
-                if(depStation == Constants.PR) { DelaysAboveOneMinutePR[tramId]++; }
-                else { DelaysAboveOneMinuteCS[tramId]++; }
-            }
+            if (moreThanAMinute) { DelaysOverOneMinute++; }
         }
 
         public double MaxDelay()

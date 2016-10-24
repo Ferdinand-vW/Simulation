@@ -5,6 +5,7 @@ using System.Text;
 
 namespace TramSimulator
 {
+    [Serializable]
     public class Data
     {
         Dictionary<DayOfWeek, DayData> days;
@@ -45,33 +46,12 @@ namespace TramSimulator
             return days[day].EnteringFQ(busStop, time) * enterPrognose[station];
         }
 
-        public int EnteringTotal(DayOfWeek day, string station)
-        {
-            return days[day].EnteringTotal(stationToBus[station]);
-        }
-
-        public double DepartingFQ(DayOfWeek day, string station, double time)
-        {
-            string busStop = stationToBus[station];
-            return days[day].DepartingFQ(busStop, time) * exitPrognose[station];
-        }
-
-        public double DepartingPercentage(DayOfWeek day, string station, double time)
-        {
-            string busStop = stationToBus[station];
-            return days[day].DepartingFQ(busStop, time);
-        }
-
-        public int DepartingTotal(DayOfWeek day, string station)
-        {
-            return days[day].DepartingTotal(stationToBus[station]);
-        }
-
         public double DepartPercentage(string station)
         {
             return exitPrognose[station];
         }
 
+        [Serializable]
         class DayData
         {
             Dictionary<int, Min15Block> blocks;
@@ -141,6 +121,7 @@ namespace TramSimulator
                     blocks[min].AddPC(pc);
                 }
             }
+            [Serializable]
             class Min15Block
             {
                 List<PassengerCount> PCs;

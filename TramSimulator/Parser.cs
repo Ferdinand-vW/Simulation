@@ -52,30 +52,28 @@ namespace TramSimulator
             return passengerCounts;
         }
 
-        public static ArtInput ParseArtInput(Stream s)
+        public static ArtInput ParseArtInput(Stream s,string[] stations)
         {
-
-            ArtInput input = new ArtInput();
+            ArtInput _input = new ArtInput(stations);
 
             using (StreamReader sr = new StreamReader(s))
             {
                 String line;
-                sr.ReadLine(); //throw away Top column
-
+                line = sr.ReadLine(); //throw away Top column
                 while ((line = sr.ReadLine()) != null)
                 {
                     string[] values = line.Split(new char[] { ';' });
                     string station = values[0];
-                    if (station == "P+R Uithof") { station = "PR"; }
-                    if (station == "Centraal Station Centrumzijde") { station = "CS"; }
+                    if (station == "P+R Uithof") { station = Constants.PR; }
+                    if (station == "Centraal Station Centrumzijde") { station = Constants.CS; }
                     int direction = Int32.Parse(values[1]);
                     int from = Int32.Parse(values[2]);
                     double to = Double.Parse(values[3]);
                     double passIn = Double.Parse(values[4]);
                     double passOut = Double.Parse(values[5]);
-                    input.addInput(station, direction, from, to, passIn, passOut);
+                    _input.AddInput(station, direction, from, to, passIn, passOut);
                 }
-                return input;
+                return _input;
             }
         }
 

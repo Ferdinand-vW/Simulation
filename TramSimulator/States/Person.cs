@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 
 namespace TramSimulator.States
 {
+    [Serializable]
     public class Person
     {
         public int PersonId { get; private set; }

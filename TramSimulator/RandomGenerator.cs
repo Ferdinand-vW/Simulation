@@ -29,7 +29,12 @@ namespace TramSimulator
         static public double negexp(double u)
         {
             //double lambda = (double)1 / u;
-            return Math.Log(1 - Instance.random.NextDouble()) / (-u);
+            var val = Math.Log(1 - Instance.random.NextDouble()) / (-u);
+            if(Double.IsNaN(val))
+            {
+                Console.WriteLine();
+            }
+            return val;
         }
         public static double logNormalWithoutVariance(double mean) {
             return logNormal(mean * 1.578399, mean);
@@ -42,7 +47,12 @@ namespace TramSimulator
             double mu = Math.Log(mean / Math.Sqrt(1 + (variance / (mean * mean))));
             double sigma = Math.Sqrt(Math.Log(1 + (variance / (mean * mean))));
 
-            return Math.Exp(normal(sigma,mu));
+            var val = Math.Exp(normal(sigma, mu));
+            if(Double.IsNaN(val))
+            {
+                Console.WriteLine();
+            }
+            return val;
         }
 
         public static double normal(double sigma, double mu)

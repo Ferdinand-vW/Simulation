@@ -9,6 +9,7 @@ using TramSimulator.States;
 namespace TramSimulator.Events
 {
     //event voor tram expected departure
+    [Serializable]
     public class TramExpectedDeparture : Event
     {
         //int _tramId;
@@ -21,6 +22,8 @@ namespace TramSimulator.Events
             this._tramId = tramId;
             this.StartTime = startTime;
             this._depStation = depStation;
+            this.EType = EventType.TramDeparture;
+            this.Station = depStation;
         }
 
         public override void execute(SimulationState simState)
@@ -31,7 +34,7 @@ namespace TramSimulator.Events
 
             if (_depStation != Constants.PR && _depStation != Constants.CS)
             {
-                if (tram.Direction == Routes.Dir.ToCS)
+                /*if (tram.Direction == Routes.Dir.ToCS)
                 {
                     station.TramAtCS = _tramId;
                     station.TramIsStationedCS = true;
@@ -40,16 +43,21 @@ namespace TramSimulator.Events
                 {
                     station.TramAtPR = _tramId;
                     station.TramIsStationedPR = true;
-                }
+                }*/
             }
 
             tram.State = Tram.TramState.AtStation;
+            var st = tram.Station;
             tram.Station = _depStation;
-
-            Track t = simState.Routes.GetNextTrack(_depStation, simState.Routes.NextStation(_tramId, _depStation));
+            Track cT = simState.Routes.GetTrack(_tramId);
+            if(tram.Station != cT.To && tram.Station != cT.From)
+            {
+                Console.WriteLine();
+            }
+            string nextSt = simState.Routes.NextStation(_tramId, _depStation);
+            Track t = simState.Routes.GetNextTrack(_depStation, nextSt, cT);
             //Find the next tram
             int? id = simState.Routes.NextTram(t, _tramId, _depStation, simState);
-            simState.sw.WriteLine("Next tram id: " + id);
             double currTime = StartTime;
             string central = simState.Routes.CentralToPR[0].From;
             string pr = simState.Routes.PRToCentral[0].From;
@@ -58,7 +66,6 @@ namespace TramSimulator.Events
             {
                 Tram nextTram = simState.Trams[id.Value];
                 //Tram may only depart if there is 40s between the next tram and this one
-                simState.sw.WriteLine("time: " + currTime + " " + nextTram.DepartureTime);
                 if (Math.Ceiling(currTime - nextTram.DepartureTime) >= Constants.TIME_IN_BETWEEN)
                 {
                     HandleDepartureEvent(simState);
@@ -67,17 +74,20 @@ namespace TramSimulator.Events
                 {
                     double timeDiff = Constants.TIME_IN_BETWEEN - (Math.Ceiling(currTime - nextTram.DepartureTime));
                     delayed++;
+                    if(Double.IsNaN(StartTime + timeDiff))
+                    {
+                        Console.WriteLine();
+                    }
+                    Track cT_ = simState.Routes.GetTrack(_tramId);
+                    if (cT_.To != _depStation && _depStation != Constants.PR && _depStation != Constants.CS)
+                    {
+                        Console.WriteLine();
+                    }
                     eventQueue.AddEvent(new TramExpectedDeparture(_tramId, _depStation, StartTime + timeDiff));
                 }
             }
             else
             {
-                simState.sw.WriteLine(t.From + " " + t.To + ": ");
-                t.Trams.ForEach(x =>
-                {
-                    simState.sw.Write(x);
-                });
-                simState.sw.WriteLine("");
                 HandleDepartureEvent(simState);
             }
             rounds++;
@@ -89,14 +99,51 @@ namespace TramSimulator.Events
             var tram = simState.Trams[_tramId];
             var station = simState.Stations[_depStation];
             var nextStation = simState.Routes.NextStation(_tramId, _depStation);
+            var routes = simState.Routes;
+
+            if((_depStation == "PR" && nextStation == "CS") || (_depStation == "CS" && nextStation == "PR"))
+            {
+                Console.WriteLine();
+            }
             var arrTime = StartTime + simState.Rates.TramArrivalRate(_depStation, nextStation);
 
             //Remember the time that this tram left his last station
             tram.DepartureTime = StartTime;
             //Handle departure of a tram
             tram.State = Tram.TramState.OnTrack;
-            simState.Routes.MoveToNextTrack(_tramId, _depStation, simState);
+            Track t1;
+            Track t2 = null;
+            if (_depStation != Constants.PR && _depStation != Constants.CS)
+            {
+                t1 = routes.GetTrack(_tramId);
+                routes.MoveToNextTrack(_tramId, _depStation, simState);
+                t2 = routes.GetTrack(_tramId);
+                if(t2.From == "PR" || t2.From == "CS")
+                {
+                    Console.WriteLine();
+                }
+                
+            }
 
+            if (t2 != null && t2.From == "PR" && t2.To == "WKZ")
+            {
+                Console.WriteLine();
+            }
+
+
+            if (Double.IsNaN(arrTime))
+            {
+                Console.WriteLine();
+            }
+            if(simState.Rates.AvgTramArrival(_depStation, nextStation) == Double.MaxValue)
+            {
+                Console.WriteLine();
+            }
+
+            if (station.TramAtCS != _tramId && station.TramAtPR != _tramId)
+            {
+                Console.WriteLine();
+            }
             eventQueue.AddEvent(new TramExpectedArrival(_tramId, arrTime, nextStation));
 
             GenerateEventForNextTram(simState);
@@ -141,6 +188,10 @@ namespace TramSimulator.Events
                     station.TramIsStationedCS = false;
                     station.TramAtCS = null;
                 }
+                else
+                {
+                    throw new Exception("help");
+                }
 
                 waitingtrams = _depStation == Constants.PR ? station.WaitingTramsToPR : station.WaitingTramsToCS;
                 
@@ -153,8 +204,29 @@ namespace TramSimulator.Events
             }
             else
             {
+                if (Double.IsNaN(StartTime))
+                {
+                    Console.WriteLine();
+                }
                 if (waitingtrams.Count > 0) { nextTramId = waitingtrams.Peek(); }
-                if (nextTramId != -1) { eventQueue.AddEvent(new TramExpectedArrival(nextTramId, StartTime, _depStation)); }
+                if (nextTramId != -1) {
+
+                    Track t = simState.Routes.GetTrack(nextTramId);
+                    if(t.From == _depStation)
+                    {
+                        Console.WriteLine();
+                    }
+                    var pr = simState.Stations["PR"];
+                    if(nextTramId == 2 && pr.WaitingTramsToPR.Contains(2) && pr.TramAtPR.HasValue && pr.TramAtCS.HasValue)
+                    {
+                        Console.WriteLine();
+                    }
+                    if(station.TramAtCS == _tramId || station.TramAtPR == _tramId)
+                    {
+                        Console.WriteLine();
+                    }
+                    eventQueue.AddEvent(new TramExpectedArrival(nextTramId, StartTime, _depStation));
+                }
             }
         }
 

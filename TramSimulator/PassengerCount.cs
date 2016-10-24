@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 
 namespace TramSimulator
 {
+    [Serializable]
     public class PassengerCount
     {
         public string Trip { get; set; }

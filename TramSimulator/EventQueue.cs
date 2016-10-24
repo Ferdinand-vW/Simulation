@@ -11,6 +11,7 @@ namespace TramSimulator
     //Priority queue for events
     //super lelijk O(n) maar n is altijd constant dus het valt mee
     // SortedList en dergelijke zorgden voor problemen
+    [Serializable]
     public class EventQueue
     {
         public List<Event> EventList { get; private set; }

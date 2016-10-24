@@ -8,6 +8,7 @@ using TramSimulator.States;
 
 namespace TramSimulator.Events
 {
+    [Serializable]
     public class EnterTrack : Event
     {
        // int _tramId;
@@ -18,6 +19,7 @@ namespace TramSimulator.Events
             this._tramId = tramId;
             this._station = station;
             this.StartTime = startTime;
+            this.EType = EventType.Other;
         }
 
         public override void execute(SimulationState simState)
@@ -39,7 +41,7 @@ namespace TramSimulator.Events
 
                 //Insert the tram into the route
                 var route = simState.Routes.PRToCentral;
-                route[0].Trams.Insert(0, _tramId);
+                route[1].Trams.Insert(0, _tramId);
                 var tram = simState.Trams[_tramId];
                 tram.State = Tram.TramState.AtStation;
                 tram.Station = _station;
@@ -50,7 +52,13 @@ namespace TramSimulator.Events
                 {
                     station.EnterTrackQueue.Dequeue();
                 }
-                
+                Track cT = simState.Routes.GetTrack(_tramId);
+
+                Track t = simState.Routes.GetTrack(_tramId);
+                if(t.From != _station)
+                {
+                    Console.WriteLine();
+                }
                 eventQueue.AddEvent(new TramExpectedDeparture(_tramId, _station, StartTime));
 
                 if(station.EnterTrackQueue.Count > 0)
