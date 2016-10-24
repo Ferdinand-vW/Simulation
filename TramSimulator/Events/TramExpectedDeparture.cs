@@ -9,7 +9,6 @@ using TramSimulator.States;
 namespace TramSimulator.Events
 {
     //event voor tram expected departure
-    [Serializable]
     public class TramExpectedDeparture : Event
     {
         //int _tramId;

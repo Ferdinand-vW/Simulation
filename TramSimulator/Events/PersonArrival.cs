@@ -10,7 +10,6 @@ namespace TramSimulator.Events
 {
     //event voor als een persoon aan komt op een bepaald station
     //creert ook de event voor de volgende 
-    [Serializable]
     public class PersonArrival : Event
     {
         string _stationName;

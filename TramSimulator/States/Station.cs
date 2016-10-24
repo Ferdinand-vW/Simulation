@@ -6,7 +6,6 @@ using System.Threading.Tasks;
 
 namespace TramSimulator.States
 {
-    [Serializable]
     public class Station
     {
         readonly String _name;

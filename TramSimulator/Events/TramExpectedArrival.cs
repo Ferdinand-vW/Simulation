@@ -9,7 +9,6 @@ using TramSimulator.States;
 namespace TramSimulator.Events
 {
     //event voor tram expected arrival
-    [Serializable]
     public class TramExpectedArrival : Event
     {
         //int _tramId;
@@ -206,7 +205,6 @@ namespace TramSimulator.Events
                     station.TramIsStationedCS = true;
                 }
                 
-                var waits = waitingtrams.DeepClone();
                 //The only way to get to this point is if the tram is still at the head of the queue. 
                 //We've now set that this tram is at this station, so we can remove him from the queue.
                 if (waitingtrams.Count > 0)

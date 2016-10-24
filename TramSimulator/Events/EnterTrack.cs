@@ -8,7 +8,6 @@ using TramSimulator.States;
 
 namespace TramSimulator.Events
 {
-    [Serializable]
     public class EnterTrack : Event
     {
        // int _tramId;

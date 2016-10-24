@@ -7,7 +7,6 @@ using System.IO;
 
 using TramSimulator.Events;
 using TramSimulator.States;
-using System.Runtime.Serialization.Formatters.Binary;
 
 namespace TramSimulator
 {
@@ -22,7 +21,7 @@ namespace TramSimulator
             SimulationState simState = Setup(tramFrequency, turnAroundTime, Constants.BEGIN_TIME, stationNames,dayOfWeek, rates);
             int n = 0;
             Event e = null;
-            StreamWriter sw = new StreamWriter("test.txt");
+            //StreamWriter sw = new StreamWriter("test.txt");
             while (simState.EventQueue.HasEvent())
             {
 
@@ -99,7 +98,7 @@ namespace TramSimulator
                 if(e.StartTime > Constants.END_TIME) { break; }
                 e.execute(simState);
                 //simState.Stations["CS"].WaitingTramsToCS.ToList().ForEach(x => Console.WriteLine(x));
-                if (e.GetType() != typeof(PersonArrival))
+                /*if (e.GetType() != typeof(PersonArrival))
                 {
                     sw.WriteLine("Event " + n + ": " + e.ToString() + " " + simState.Stations["PR"].TramAtCS.HasValue + " " + simState.Stations["PR"].TramAtPR.HasValue
                     + " " + simState.Stations["CS"].TramAtCS.HasValue + " " + simState.Stations["CS"].TramAtPR.HasValue + " ID: ");
@@ -125,10 +124,11 @@ namespace TramSimulator
                     sw.WriteLine();
                     simState.Stations.Values.ToList().ForEach(x => x.PrintQueues(simState));
                 }
+                */
 
                 //var routeOld = simState.Routes.DeepClone<Routes>();
                 
-                Console.WriteLine(e.ToString());
+                //Console.WriteLine(e.ToString());
                 //e.Snapshot = simState.DeepClone();
                 simState.HandledEvents.Add(e);
 
@@ -150,7 +150,7 @@ namespace TramSimulator
 
                 n++;
             }
-            sw.Close();
+            //sw.Close();
 
             return simState;
         }
@@ -211,20 +211,4 @@ namespace TramSimulator
         }
 
     }
-
-    public static class ExtensionMethods
-    {
-        // Deep clone
-        public static T DeepClone<T>(this T a)
-        {
-            using (MemoryStream stream = new MemoryStream())
-            {
-                BinaryFormatter formatter = new BinaryFormatter();
-                formatter.Serialize(stream, a);
-                stream.Position = 0;
-                return (T)formatter.Deserialize(stream);
-            }
-        }
-    }
-
 }

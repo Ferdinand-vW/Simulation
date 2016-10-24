@@ -9,7 +9,6 @@ using TramSimulator;
 namespace TramSimulator.States
 {
     // State of Tram includes station i and if it is on track between i and i+1
-    [Serializable]
     public class Tram
     {
         public enum TramState { AtStation, Waiting, OnTrack, Delayed, AtShuntyard };

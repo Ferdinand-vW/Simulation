@@ -7,7 +7,6 @@ using System.Threading.Tasks;
 namespace TramSimulator.Events
 {
     //Class for events
-    [Serializable]
     public class Event
     {
         public double StartTime { get; set; }

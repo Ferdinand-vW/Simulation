@@ -6,7 +6,6 @@ using TramSimulator.States;
 
 namespace TramSimulator.Events
 {
-    [Serializable]
     class TurnAround : Event
     {
         //int _tramId;

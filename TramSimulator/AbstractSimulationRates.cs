@@ -8,7 +8,6 @@ using TramSimulator.States;
 
 namespace TramSimulator
 {
-    [Serializable]
     public abstract class AbstractSimulationRates
     {
         public abstract double PersonArrivalRate(string station, Routes.Dir dir, double time);

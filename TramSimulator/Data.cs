@@ -5,7 +5,6 @@ using System.Text;
 
 namespace TramSimulator
 {
-    [Serializable]
     public class Data
     {
         Dictionary<DayOfWeek, DayData> days;
@@ -51,7 +50,6 @@ namespace TramSimulator
             return exitPrognose[station];
         }
 
-        [Serializable]
         class DayData
         {
             Dictionary<int, Min15Block> blocks;
@@ -121,7 +119,6 @@ namespace TramSimulator
                     blocks[min].AddPC(pc);
                 }
             }
-            [Serializable]
             class Min15Block
             {
                 List<PassengerCount> PCs;

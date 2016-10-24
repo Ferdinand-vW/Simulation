@@ -6,7 +6,6 @@ using System.Threading.Tasks;
 
 namespace TramSimulator.States
 {
-    [Serializable]
     public class Routes
     {
         public List<Track> CentralToPR { get; set; }
@@ -170,7 +169,6 @@ namespace TramSimulator.States
         }
     }
 
-    [Serializable]
     public class Track
     {
         public string From { get; set; }

@@ -10,7 +10,6 @@ using TramSimulator.Events;
 
 namespace TramSimulator
 {
-    [Serializable]
     public class SimulationState
     {
         public Dictionary<int, Tram> Trams { get; private set; }

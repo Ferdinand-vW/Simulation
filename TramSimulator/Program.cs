@@ -18,9 +18,12 @@ namespace TramSimulator
     {
         static void Main(string[] args)
         {
+            var l = Program.ConfidenceInterval(new List<double>{1,10,4}, new List<double>{22,6,10});
+            l.ForEach(x => Console.WriteLine(x));
+            Console.ReadLine();
             Console.WriteLine("Start reading passengercount data..");
-            String patha = @"../../../a_data_updated.csv";
-            String pathb = @"../../../b_data_updated.csv";
+            String patha = @"../a_data_updated.csv";
+            String pathb = @"../b_data_updated.csv";
 
             Stream streama = File.Open(patha, FileMode.Open);
             Stream streamb = File.Open(pathb, FileMode.Open);
@@ -87,103 +90,160 @@ namespace TramSimulator
             passengerCountsB.ForEach(x => b.AddPC(x));
             string[] stations = enterPrognoseA.Keys.ToArray();
 
-            Stream f1 = File.Open("../../input-data-passengers-01.csv", FileMode.Open);
+            Stream f1 = File.Open("input-data-passengers-01.csv", FileMode.Open);
             ArtInput f1A = Parser.ParseArtInput(f1, stations);
             Console.WriteLine(f1A.PRCS.Count);
-            Stream f15 = File.Open("../../input-data-passengers-015.csv", FileMode.Open);
+            Stream f15 = File.Open("input-data-passengers-015.csv", FileMode.Open);
             ArtInput f15A = Parser.ParseArtInput(f15, stations);
-            Stream f2 = File.Open("../../input-data-passengers-02.csv", FileMode.Open);
+            Stream f2 = File.Open("input-data-passengers-02.csv", FileMode.Open);
             ArtInput f2A = Parser.ParseArtInput(f2, stations);
-            Stream f25 = File.Open("../../input-data-passengers-025.csv", FileMode.Open);
+            Stream f25 = File.Open("input-data-passengers-025.csv", FileMode.Open);
             ArtInput f25A = Parser.ParseArtInput(f25, stations);
-            Stream f3 = File.Open("../../input-data-passengers-03.csv", FileMode.Open);
+            Stream f3 = File.Open("input-data-passengers-03.csv", FileMode.Open);
             ArtInput f3A = Parser.ParseArtInput(f3, stations);
-            Stream f4 = File.Open("../../input-data-passengers-04.csv", FileMode.Open);
+            Stream f4 = File.Open("input-data-passengers-04.csv", FileMode.Open);
             ArtInput f4A = Parser.ParseArtInput(f4, stations);
-            Stream f6 = File.Open("../../input-data-passengers-06.csv", FileMode.Open);
+            Stream f6 = File.Open("input-data-passengers-06.csv", FileMode.Open);
             ArtInput f6A = Parser.ParseArtInput(f6, stations);
 
             Console.WriteLine("Finished reading passengercount data");
 
-            RunSimulation("realistic.txt", new SimulationRates(a, b, DayOfWeek.Wednesday), stations);
-            /*RunSimulation("File1.txt", new ArtificialRates(f1A), stations);
-            RunSimulation("File15.txt", new ArtificialRates(f15A), stations);
-            RunSimulation("File2.txt", new ArtificialRates(f2A), stations);
-            RunSimulation("File25.txt", new ArtificialRates(f25A), stations);
-            RunSimulation("File3.txt", new ArtificialRates(f3A), stations);
-            RunSimulation("File4.txt", new ArtificialRates(f4A), stations);
-            RunSimulation("File6.txt", new ArtificialRates(f6A), stations);*/
+            var results_realistic = RunSimulation("realistic.txt", new SimulationRates(a, b, DayOfWeek.Wednesday), stations);
+            /*var results_file1 = RunSimulation("File1.txt", new ArtificialRates(f1A), stations);
+            var results_file15 = RunSimulation("File15.txt", new ArtificialRates(f15A), stations);
+            var results_file2 = RunSimulation("File2.txt", new ArtificialRates(f2A), stations);
+            var results_file25 = RunSimulation("File25.txt", new ArtificialRates(f25A), stations);
+            var results_file3 = RunSimulation("File3.txt", new ArtificialRates(f3A), stations);
+            var results_file4 = RunSimulation("File4.txt", new ArtificialRates(f4A), stations);
+            var results_file6 = RunSimulation("File6.txt", new ArtificialRates(f6A), stations);*/
 
+            Stream s = File.Create("results.csv");
+            using(StreamWriter sw = new StreamWriter(s))
+            {
+                foreach(var perf in results_realistic.Values.ToList()[0].Keys)
+                {
+                    sw.WriteLine("--------------------------------------------------");
+                    sw.WriteLine(perf);
+
+                    var matrix = new List<string>();
+
+                    matrix.Add(";" + String.Join(";",results_realistic.Keys));
+
+                    foreach(var kvp in results_realistic)
+                    {
+                        var row = new List<string>();
+                        row.Add(kvp.Key);
+                        foreach(var kvp2 in results_realistic)
+                        {
+                            var pf1 = kvp.Value[perf];
+                            var pf2 = kvp2.Value[perf];
+                            var conf = ConfidenceInterval(pf1, pf2);
+
+                            row.Add(String.Join(":", conf));
+                        }
+
+                        matrix.Add(String.Join(";", row));
+                    }
+
+                    matrix.ForEach(x => sw.WriteLine(x));
+                }
+            }
 
             Console.ReadLine();
         }
 
-        public static void RunSimulation(string filename, AbstractSimulationRates rates, string[] stationsArr)
+        public static Dictionary<string,Dictionary<string,List<double>>> RunSimulation(string filename, AbstractSimulationRates rates, string[] stationsArr)
         {
             Simulation sim = new Simulation();
             //debug, frequency, turnaroundtime, day, stations
 
-            List<double> csMaxDelays = new List<double>();
-            List<double> prMaxDelays = new List<double>();
-            List<double> csAvgDelays = new List<double>();
-            List<double> prAvgDelays = new List<double>();
-            List<double> prcDelaysOverOneMinute = new List<double>();
-            List<double> maxWaitTimes = new List<double>();
-            List<double> avgWaitTimes = new List<double>();
-            List<double> maxTravelTimes = new List<double>();
-            List<double> avgTravelTimes = new List<double>();
-            List<double> csMaxQueueSizes = new List<double>();
-            List<double> prMaxQueueSizes = new List<double>();
+            var configResults = new Dictionary<string,Dictionary<string,List<double>>>();
+            
             Console.WriteLine("Start simulation " + filename);
 
-            for (int i = 0; i < 10; i++)
-            {
-                Console.WriteLine("Start run " + (i + 1));
-                var results = sim.run(false, 12, 240, DayOfWeek.Wednesday, stationsArr, rates);
-                var trams = results.Trams;
-                var timetable = results.TimeTable;
-                var persons = results.Persons.Values.ToList();
-                var stations = results.Stations;
+            var configs = new List<List<double>>{ 
+                new List<double> { 16, 4},
+                new List<double> { 16, 5},
+                new List<double> { 16, 6},
+                new List<double> { 18, 4},
+                new List<double> { 18, 5},
+                new List<double> { 18, 6},
+                new List<double> { 20, 4},
+                new List<double> { 20, 5},
+                new List<double> { 20, 6},
+                new List<double> { 22, 4},
+                new List<double> { 22, 5},
+                new List<double> { 22, 6},
+                new List<double> { 24, 4},
+                new List<double> { 24, 5},
+                new List<double> { 24, 6}};
 
-                //Maximum delay of a tram
-                csMaxDelays.Add(timetable.CSMaxDelay);
-                prMaxDelays.Add(timetable.PRMaxDelay);
-                //Average total delay of a tram
-                csAvgDelays.Add(timetable.CSAverageDelay);
-                prAvgDelays.Add(timetable.PRAverageDelay);
-                //Percentage delays over one minute
-                prcDelaysOverOneMinute.Add((double)timetable.DelaysOverOneMinute / timetable.NumberOfRounds);
-                //Max waiting time of a person
-                maxWaitTimes.Add(persons.Max(x => x.WaitingTime));
-                //Average waiting time of a person
-                avgWaitTimes.Add(persons.Sum(x => x.WaitingTime) / persons.Count);
-                //Maximum travel time of a person
-                maxTravelTimes.Add(persons.Max(x => x.LeaveTime - x.ArrivalTime));
-                //Average travel time of a person
-                avgTravelTimes.Add(persons.Sum(x => x.LeaveTime - x.ArrivalTime) / persons.Count);
-                //Maximum queue length
-                csMaxQueueSizes.Add(stations.Values.ToList().Max(x => x.MaxQueueLengthCS));
-                prMaxQueueSizes.Add(stations.Values.ToList().Max(x => x.MaxQueueLengthPR));
+            for(int j = 0; j < configs.Count; j++)
+            {   
+                var performM = new Dictionary<string, List<double>>();
+                performM.Add("CSMaxDelays", new List<double>());
+                performM.Add("PRMaxDelays", new List<double>());
+                performM.Add("CSAvgDelays", new List<double>());
+                performM.Add("PRAvgDelays", new List<double>());
+                performM.Add("PrcOverOneMinuteDelay", new List<double>());
+                performM.Add("MaxWaitTimes", new List<double>());
+                performM.Add("AvgWaitTimes", new List<double>());
+                performM.Add("MaxTravelTimes", new List<double>());
+                performM.Add("AvgTravelTimes", new List<double>());
+                performM.Add("CSMaxQueueSizes", new List<double>());
+                performM.Add("PRMaxQueueSizes", new List<double>());
+
+                for (int i = 0; i < 3; i++)
+                {
+                    Console.WriteLine("Start run " + (i + 1));
+                    var results = sim.run(false, (int)configs[j][0], (int)configs[j][1] * 60, DayOfWeek.Wednesday, stationsArr, rates);
+                    var trams = results.Trams;
+                    var timetable = results.TimeTable;
+                    var persons = results.Persons.Values.ToList();
+                    var stations = results.Stations;
+
+                    //Maximum delay of a tram
+                    performM["CSMaxDelays"].Add(timetable.CSMaxDelay);
+                    performM["PRMaxDelays"].Add(timetable.PRMaxDelay);
+                    //Average total delay of a tram
+                    performM["CSAvgDelays"].Add(timetable.CSAverageDelay);
+                    performM["PRAvgDelays"].Add(timetable.PRAverageDelay);
+                    //Percentage delays over one minute
+                    performM["PrcOverOneMinuteDelay"].Add((double)timetable.DelaysOverOneMinute / timetable.NumberOfRounds);
+                    //Max waiting time of a person
+                    performM["MaxWaitTimes"].Add(persons.Max(x => x.WaitingTime));
+                    //Average waiting time of a person
+                    performM["AvgWaitTimes"].Add(persons.Sum(x => x.WaitingTime) / persons.Count);
+                    //Maximum travel time of a person
+                    performM["MaxTravelTimes"].Add(persons.Max(x => x.LeaveTime - x.ArrivalTime));
+                    //Average travel time of a person
+                    performM["AvgTravelTimes"].Add(persons.Sum(x => x.LeaveTime - x.ArrivalTime) / persons.Count);
+                    //Maximum queue length
+                    performM["CSMaxQueueSizes"].Add(stations.Values.ToList().Max(x => x.MaxQueueLengthCS));
+                    performM["PRMaxQueueSizes"].Add(stations.Values.ToList().Max(x => x.MaxQueueLengthPR));
+                }
+
+                configResults.Add("f=" + configs[j][0] + ",q=" + configs[j][1], performM);
             }
 
             Console.WriteLine("Simulation completed. Start writing output");
-            Stream f = File.Create(filename);
-            using (StreamWriter sw = new StreamWriter(f))
-            {
-
-                sw.WriteLine(String.Join(",", csMaxDelays.Select(x => x.ToString())));
-                sw.WriteLine(String.Join(",", prMaxDelays.Select(x => x.ToString())));
-                sw.WriteLine(String.Join(",", csAvgDelays.Select(x => x.ToString())));
-                sw.WriteLine(String.Join(",", prAvgDelays.Select(x => x.ToString())));
-                sw.WriteLine(String.Join(",", prcDelaysOverOneMinute.Select(x => x.ToString())));
-                sw.WriteLine(String.Join(",", maxWaitTimes.Select(x => x.ToString())));
-                sw.WriteLine(String.Join(",", avgWaitTimes.Select(x => x.ToString())));
-                sw.WriteLine(String.Join(",", maxTravelTimes.Select(x => x.ToString())));
-                sw.WriteLine(String.Join(",", avgTravelTimes.Select(x => x.ToString())));
-                sw.WriteLine(String.Join(",", csMaxQueueSizes.Select(x => x.ToString())));
-                sw.WriteLine(String.Join(",", prMaxQueueSizes.Select(x => x.ToString())));
-            }
-            Console.WriteLine("Output has been written. Simulation over...");
+ 
+            return configResults;
+            //return new List<double>{csMaxDelays, prMaxDelays, csAvgDelays, prAvgDelays, prcDelaysOverOneMinute,
+            //maxWaitTimes, avgWaitTimes, maxTravelTimes, avgTravelTimes, csMaxQueueSizes, prMaxQueueSizes};
         }
+
+    public static List<double> ConfidenceInterval(List<double> l1, List<double> l2)
+    {
+        var diffL = l1.Select((x,i) => x - l2[i]).ToList();
+        var diffAvg = diffL.Sum() / l1.Count;
+        var variance = diffL.Sum(x => Math.Pow(x - diffAvg, 2)) / (diffL.Count - 1);
+
+        var tval = 4.303;
+        var low = Math.Round(diffAvg - tval * Math.Sqrt(variance / diffL.Count), 3);
+        var high = Math.Round(diffAvg + tval * Math.Sqrt(variance / diffL.Count), 3);
+
+        return new List<double>{low, Math.Round(diffAvg, 3), high};
+    }
     }
 }

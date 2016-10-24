@@ -8,7 +8,6 @@ using TramSimulator.States;
 
 namespace TramSimulator
 {
-    [Serializable]
     public class TimeTable
     {
         public double PRAverageDelay { get { return DelaysAtPR.Values.SelectMany(x => x).Sum() / DelaysAtPR.Values.SelectMany(x => x).Count(); } }

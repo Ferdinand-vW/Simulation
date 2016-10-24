@@ -6,7 +6,6 @@ using TramSimulator.States;
 
 namespace TramSimulator
 {
-    [Serializable]
     public class SimulationRates : AbstractSimulationRates
     {
 
