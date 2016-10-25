@@ -36,20 +36,72 @@ namespace TramSimulator
             threadB.Join();
 
             Func<double, double, double> div = (x, y) => x / y;
+            string[] stations = new string[] { "PR", "WKZ", "UMC", "Heidelberglaan", "Padualaan", "Kromme Rijn", "Galgenwaard", "Vaartscherijn", "CS" };
 
+
+            //Stream f1 = File.Open(@"F:\Users\Rogier\Source\Repos\Simulation2\TramSimulator\input-data-passengers-01.csv", FileMode.Open);
+            //ArtInput f1A = Parser.ParseArtInput(f1, stations);
+            //Console.WriteLine(f1A.PRCS.Count);
+            //Stream f15 = File.Open(@"F:\Users\Rogier\Source\Repos\Simulation2\TramSimulator\input-data-passengers-015.csv", FileMode.Open);
+            //ArtInput f15A = Parser.ParseArtInput(f15, stations);
+            //Stream f2 = File.Open(@"F:\Users\Rogier\Source\Repos\Simulation2\TramSimulator\input-data-passengers-02.csv", FileMode.Open);
+            //ArtInput f2A = Parser.ParseArtInput(f2, stations);
+            //Stream f25 = File.Open(@"F:\Users\Rogier\Source\Repos\Simulation2\TramSimulator\input-data-passengers-025.csv", FileMode.Open);
+            //ArtInput f25A = Parser.ParseArtInput(f25, stations);
+            //Stream f3 = File.Open(@"F:\Users\Rogier\Source\Repos\Simulation2\TramSimulator\input-data-passengers-03.csv", FileMode.Open);
+            //ArtInput f3A = Parser.ParseArtInput(f3, stations);
+            //Stream f4 = File.Open(@"F:\Users\Rogier\Source\Repos\Simulation2\TramSimulator\input-data-passengers-04.csv", FileMode.Open);
+            //ArtInput f4A = Parser.ParseArtInput(f4, stations);
+            //Stream f6 = File.Open(@"F:\Users\Rogier\Source\Repos\Simulation2\TramSimulator\input-data-passengers-06.csv", FileMode.Open);
+            //ArtInput f6A = Parser.ParseArtInput(f6, stations);
+
+            Console.WriteLine("Finished reading passengercount data");
+
+
+
+            //var results_file1 = RunSimulation("File1.txt", new ArtificialRates(f1A), stations);
+            //outputRun(results_file1, "File1");
+            //var results_file15 = RunSimulation("File15.txt", new ArtificialRates(f15A), stations);
+            //outputRun(results_file15, "File15");
+            //var results_file2 = RunSimulation("File2.txt", new ArtificialRates(f2A), stations);
+            //outputRun(results_file2, "File2");
+            //var results_file25 = RunSimulation("File25.txt", new ArtificialRates(f25A), stations);
+            //outputRun(results_file25, "File25");
+            //var results_file3 = RunSimulation("File3.txt", new ArtificialRates(f3A), stations);
+            //outputRun(results_file3, "File3");
+            //var results_file4 = RunSimulation("File4.txt", new ArtificialRates(f4A), stations);
+            //outputRun(results_file4, "File4");
+            //var results_file6 = RunSimulation("File6.txt", new ArtificialRates(f6A), stations);
+            //outputRun(results_file6, "File6");
+
+
+            for (int i = 1; i <= 6; i++) {
+                double c = (double)i / 2;
+                Data a = dataA(c, passengerCountsA);
+                Data b = dataB(c, passengerCountsB);
+                var results_realistic = RunSimulation("realistic.txt", new SimulationRates(a, b, DayOfWeek.Wednesday), stations);
+                outputRun(results_realistic, "c=" + i );
+            }
+
+
+
+        }
+
+        public static Data dataA(double c, List<PassengerCount> passengerCountsA) {
+            Func<double, double, double> div = (x, y) => x / y;
             Dictionary<string, double> enterPrognoseA = new Dictionary<string, double>();
-            Dictionary<string, double> enterPrognoseB = new Dictionary<string, double>();
+
             Dictionary<string, double> exitPrognoseA = new Dictionary<string, double>();
-            Dictionary<string, double> exitPrognoseB = new Dictionary<string, double>();
-            enterPrognoseA["PR"] = 15;
-            enterPrognoseA["WKZ"] = 1015;
-            enterPrognoseA["UMC"] = 2660;
-            enterPrognoseA["Heidelberglaan"] = 9138;
-            enterPrognoseA["Padualaan"] = 6855;
-            enterPrognoseA["Kromme Rijn"] = 691;
-            enterPrognoseA["Galgenwaard"] = 606;
-            enterPrognoseA["Vaartscherijn"] = 1261;
-            enterPrognoseA["CS"] = 0;
+
+            enterPrognoseA["PR"] = 15 * c;
+            enterPrognoseA["WKZ"] = 1015 * c;
+            enterPrognoseA["UMC"] = 2660 * c;
+            enterPrognoseA["Heidelberglaan"] = 9138 * c;
+            enterPrognoseA["Padualaan"] = 6855 * c;
+            enterPrognoseA["Kromme Rijn"] = 691 * c;
+            enterPrognoseA["Galgenwaard"] = 606 * c;
+            enterPrognoseA["Vaartscherijn"] = 1261 * c;
+            enterPrognoseA["CS"] = 0 * c;
 
             exitPrognoseA["PR"] = 0;
             exitPrognoseA["WKZ"] = 0;
@@ -61,15 +113,25 @@ namespace TramSimulator
             exitPrognoseA["Vaartscherijn"] = div(544, 20447);
             exitPrognoseA["CS"] = div(21164, 21164);
 
-            enterPrognoseB["CS"] = 19994;
-            enterPrognoseB["Vaartscherijn"] = 2337;
-            enterPrognoseB["Galgenwaard"] = 359;
-            enterPrognoseB["Kromme Rijn"] = 47;
-            enterPrognoseB["Padualaan"] = 10;
-            enterPrognoseB["Heidelberglaan"] = 8;
-            enterPrognoseB["UMC"] = 6;
-            enterPrognoseB["WKZ"] = 0;
-            enterPrognoseB["PR"] = 0;
+
+            Data a = new Data(enterPrognoseA, exitPrognoseA);
+            passengerCountsA.ForEach(x => a.AddPC(x));
+            return a;
+        }
+        public static Data dataB(double c, List<PassengerCount> passengerCountsB)
+        {
+            Func<double, double, double> div = (x, y) => x / y;
+            Dictionary<string, double> enterPrognoseB = new Dictionary<string, double>();
+            Dictionary<string, double> exitPrognoseB = new Dictionary<string, double>();
+            enterPrognoseB["CS"] = 19994 * c;
+            enterPrognoseB["Vaartscherijn"] = 2337 * c;
+            enterPrognoseB["Galgenwaard"] = 359 * c;
+            enterPrognoseB["Kromme Rijn"] = 47 * c;
+            enterPrognoseB["Padualaan"] = 10 * c;
+            enterPrognoseB["Heidelberglaan"] = 8 * c;
+            enterPrognoseB["UMC"] = 6 * c;
+            enterPrognoseB["WKZ"] = 0 * c;
+            enterPrognoseB["PR"] = 0 * c;
 
             exitPrognoseB["CS"] = 0;
             exitPrognoseB["Vaartscherijn"] = div(1735, 19994);
@@ -81,48 +143,18 @@ namespace TramSimulator
             exitPrognoseB["WKZ"] = div(644, 659);
             exitPrognoseB["PR"] = 1;
 
-            Data a = new Data(enterPrognoseA, exitPrognoseA);
+
+
             Data b = new Data(enterPrognoseB, exitPrognoseB);
-            passengerCountsA.ForEach(x => a.AddPC(x));
             passengerCountsB.ForEach(x => b.AddPC(x));
-            string[] stations = enterPrognoseA.Keys.ToArray();
-
+            return b;
+        }
+        public static void outputRun(Dictionary<string, Dictionary<string, List<double>>> results_realistic, string fileNameExt)
+        {
             /*
-            Stream f1 = File.Open("input-data-passengers-01.csv", FileMode.Open);
-            ArtInput f1A = Parser.ParseArtInput(f1, stations);
-            Console.WriteLine(f1A.PRCS.Count);
-            Stream f15 = File.Open("input-data-passengers-015.csv", FileMode.Open);
-            ArtInput f15A = Parser.ParseArtInput(f15, stations);
-            Stream f2 = File.Open("input-data-passengers-02.csv", FileMode.Open);
-            ArtInput f2A = Parser.ParseArtInput(f2, stations);
-            Stream f25 = File.Open("input-data-passengers-025.csv", FileMode.Open);
-            ArtInput f25A = Parser.ParseArtInput(f25, stations);
-            Stream f3 = File.Open("input-data-passengers-03.csv", FileMode.Open);
-            ArtInput f3A = Parser.ParseArtInput(f3, stations);
-            Stream f4 = File.Open("input-data-passengers-04.csv", FileMode.Open);
-            ArtInput f4A = Parser.ParseArtInput(f4, stations);
-            Stream f6 = File.Open("input-data-passengers-06.csv", FileMode.Open);
-            ArtInput f6A = Parser.ParseArtInput(f6, stations);
-            */
-
-            Console.WriteLine("Finished reading passengercount data");
-
-            var results_realistic = RunSimulation("realistic.txt", new SimulationRates(a, b, DayOfWeek.Wednesday), stations);
-
-
-            /*var results_file1 = RunSimulation("File1.txt", new ArtificialRates(f1A), stations);
-            var results_file15 = RunSimulation("File15.txt", new ArtificialRates(f15A), stations);
-            var results_file2 = RunSimulation("File2.txt", new ArtificialRates(f2A), stations);
-            var results_file25 = RunSimulation("File25.txt", new ArtificialRates(f25A), stations);
-            var results_file3 = RunSimulation("File3.txt", new ArtificialRates(f3A), stations);
-            var results_file4 = RunSimulation("File4.txt", new ArtificialRates(f4A), stations);
-            var results_file6 = RunSimulation("File6.txt", new ArtificialRates(f6A), stations);*/
-
-
-            
             foreach (var perf in results_realistic.Values.ToList()[0].Keys)
             {
-                Stream s = File.Create(perf + ".csv");
+                Stream s = File.Create(perf + fileNameExt + ".csv");
                 using (StreamWriter sw = new StreamWriter(s))
                 {
                     var matrix = new List<string>();
@@ -148,12 +180,12 @@ namespace TramSimulator
                     matrix.ForEach(x => sw.WriteLine(x));
                 }
             }
-
-
+            */
+            Console.WriteLine(fileNameExt);
             // alle runs per configuratie
             foreach (var kvp in results_realistic)
             {
-                Stream s = File.Create(kvp.Key + ".csv");
+                Stream s = File.Create(kvp.Key + fileNameExt + ".csv");
                 var results = kvp.Value;
                 using (StreamWriter sw = new StreamWriter(s))
                 {
@@ -180,7 +212,7 @@ namespace TramSimulator
 
             //Alle gemiddelde van alle configuraties
 
-            Stream ss = File.Create("Alles.csv");
+            Stream ss = File.Create("Alles" + fileNameExt + ".csv");
 
             using (StreamWriter sw = new StreamWriter(ss))
             {
@@ -199,14 +231,14 @@ namespace TramSimulator
                     {
                         var results = kvp.Value;
                         var list = results[perf];
-                        row.Add(Math.Round((list.Sum(x => x) / list.Count()),3).ToString());
+                        row.Add(String.Join(":", ConfidenceIntervalSingle(list)));
                     }
                     matrix.Add(String.Join(";", row));
                 }
                 matrix.ForEach(x => sw.WriteLine(x));
             }
 
-            Console.ReadLine();
+            Console.WriteLine(fileNameExt + " is done");
         }
 
         public static Dictionary<string, Dictionary<string, List<double>>> RunSimulation(string filename, AbstractSimulationRates rates, string[] stationsArr)
@@ -219,20 +251,20 @@ namespace TramSimulator
             Console.WriteLine("Start simulation " + filename);
 
             var configs = new List<List<double>>{
-                new List<double> { 16, 4},
-                new List<double> { 16, 5},
+                //new List<double> { 16, 4},
+                //new List<double> { 16, 5},
                 new List<double> { 16, 6},
-                new List<double> { 18, 4},
-                new List<double> { 18, 5},
-                new List<double> { 18, 6},
-                new List<double> { 20, 4},
-                new List<double> { 20, 5},
+                //new List<double> { 18, 4},
+                //new List<double> { 18, 5},
+                //new List<double> { 18, 6},
+                //new List<double> { 20, 4},
+                //new List<double> { 20, 5},
                 new List<double> { 20, 6},
-                new List<double> { 22, 4},
-                new List<double> { 22, 5},
-                new List<double> { 22, 6},
-                new List<double> { 24, 4},
-                new List<double> { 24, 5},
+                //new List<double> { 22, 4},
+                //new List<double> { 22, 5},
+                //new List<double> { 22, 6},
+                //new List<double> { 24, 4},
+                //new List<double> { 24, 5},
                 new List<double> { 24, 6}};
 
             for (int j = 0; j < configs.Count; j++)
@@ -268,13 +300,13 @@ namespace TramSimulator
                     //Percentage delays over one minute
                     performM["PrcOverOneMinuteDelay"].Add((double)timetable.DelaysOverOneMinute / timetable.NumberOfRounds);
                     //Max waiting time of a person
-                    performM["MaxWaitTimes"].Add(persons.Max(x => x.WaitingTime));
+                    performM["MaxWaitTimes"].Add(persons.Where(x => x.ArrivalTime > 7 * 3600).Max(x => x.WaitingTime));
                     //Average waiting time of a person
-                    performM["AvgWaitTimes"].Add(persons.Sum(x => x.WaitingTime) / persons.Count);
+                    performM["AvgWaitTimes"].Add(persons.Where(x => x.ArrivalTime > 7 * 3600).Sum(x => x.WaitingTime) / persons.Count);
                     //Maximum travel time of a person
-                    performM["MaxTravelTimes"].Add(persons.Max(x => x.LeaveTime - x.ArrivalTime));
+                    performM["MaxTravelTimes"].Add(persons.Where(x => x.ArrivalTime > 7 * 3600).Max(x => x.LeaveTime - x.ArrivalTime));
                     //Average travel time of a person
-                    performM["AvgTravelTimes"].Add(persons.Sum(x => x.LeaveTime - x.ArrivalTime) / persons.Count);
+                    performM["AvgTravelTimes"].Add(persons.Where(x => x.ArrivalTime > 7 * 3600).Sum(x => x.LeaveTime - x.ArrivalTime) / persons.Count);
                     //Maximum queue length
                     performM["CSMaxQueueSizes"].Add(stations.Values.ToList().Max(x => x.MaxQueueLengthCS));
                     performM["PRMaxQueueSizes"].Add(stations.Values.ToList().Max(x => x.MaxQueueLengthPR));
@@ -299,6 +331,17 @@ namespace TramSimulator
             var tval = 1.984;
             var low = Math.Round(diffAvg - tval * Math.Sqrt(variance / diffL.Count), 3);
             var high = Math.Round(diffAvg + tval * Math.Sqrt(variance / diffL.Count), 3);
+
+            return new List<double> { low, high };
+        }
+        public static List<double> ConfidenceIntervalSingle(List<double> l1)
+        {
+            var diffAvg = l1.Sum() / l1.Count;
+            var variance = l1.Sum(x => Math.Pow(x - diffAvg, 2)) / (l1.Count - 1);
+
+            var tval = 1.984;
+            var low = Math.Round(diffAvg - tval * Math.Sqrt(variance / l1.Count), 3);
+            var high = Math.Round(diffAvg + tval * Math.Sqrt(variance / l1.Count), 3);
 
             return new List<double> { low, high };
         }
