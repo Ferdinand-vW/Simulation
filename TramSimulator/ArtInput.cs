@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using TramSimulator.States;
+using TramSimulator;
 
 namespace TramSimulator
 {
@@ -49,14 +50,21 @@ namespace TramSimulator
         {
             if (dir == Routes.Dir.ToPR)
             {
-                double numberOnTrain = OnTrain(station, time, dir);
-                //If no one is on the train, Everybody gets out. 
-                return numberOnTrain == 0 ? 1 : CSPR[station].PassOut(time) / numberOnTrain;
+                if (station == Constants.PR) { return 1; }
+                else {
+                    double numberOnTrain = OnTrain(station, time, dir);
+                    //If no one is on the train, Everybody gets out. 
+                    return numberOnTrain == 0 ? 1 : CSPR[station].PassOut(time) / numberOnTrain;
+                }
             }
 
             else {
-                double numberOnTrain = OnTrain(station, time, dir);
-                return numberOnTrain == 0 ? 1 : PRCS[station].PassOut(time) / numberOnTrain;
+                if (station == Constants.CS) { return 1; }
+                else
+                {
+                    double numberOnTrain = OnTrain(station, time, dir);
+                    return numberOnTrain == 0 ? 1 : PRCS[station].PassOut(time) / numberOnTrain;
+                }
             }
 
         }
@@ -136,7 +144,7 @@ namespace TramSimulator
         {
             foreach (var kvp in fromTo)
             {
-                if (kvp.Key * 60 * 60 <= time && time < kvp.Value * 60 * 60)
+                if (kvp.Key * 60 * 60 <= time && time <= kvp.Value * 60 * 60)
                 { return kvp.Key; }
             }
 
