@@ -1,9 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-
-using TramSimulator.States;
+﻿using TramSimulator.States;
+using TramSimulator.Sim;
 
 namespace TramSimulator.Events
 {
@@ -18,14 +14,15 @@ namespace TramSimulator.Events
             this._stationName = stationName;
             this.EType = EventType.Other;
         }
-        public override void execute(SimulationState simState)
+        public override void Execute(SimulationState simState)
         {
-            if (!simState.Rates.nonZeroPercentage(StartTime, _stationName, _direction))
+            //If there are people arriving this 15 minute block
+            if (!simState.Rates.NonZeroPercentage(StartTime, _stationName, _direction))
             {
                 double newTime = StartTime + simState.Rates.PersonArrivalRate(_stationName, _direction, StartTime);
                 simState.EventQueue.AddEvent(new PersonArrival(newTime, _stationName, _direction));
             }
-            else
+            else //Otherwise set a new zeropersonarrival event for over 15 minutes
             {
                 simState.EventQueue.AddEvent(new ZeroPersonArrival(StartTime + (Constants.SECONDS_IN_MINUTE * 15), _stationName, _direction));
             }

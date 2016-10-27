@@ -1,8 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+
+using TramSimulator.Sim;
 
 namespace TramSimulator.Events
 {
@@ -17,7 +15,7 @@ namespace TramSimulator.Events
         public SimulationState Snapshot { get; set; }
 
 
-        public virtual void execute(SimulationState simState) { }
+        public virtual void Execute(SimulationState simState) { }
         public override String ToString()
         {
             return StartTime + "";

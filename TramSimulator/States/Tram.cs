@@ -1,27 +1,23 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-using TramSimulator;
 
 namespace TramSimulator.States
 {
-    // State of Tram includes station i and if it is on track between i and i+1
     public class Tram
     {
         public enum TramState { AtStation, Waiting, OnTrack, Delayed, AtShuntyard };
-
-        public string Station { get; set; }
-        public TramState State { get; set; }
         public const int CAPACITY = 420;
+
+        //Tram identier
         readonly int _tramId;
         public int TramId { get { return _tramId; } }
+
+        //Tram state
+        public string Station { get; set; }
+        public TramState State { get; set; }
         public double DepartureTime { get; set; }
         public List<int> PersonsOnTram { get; set; }
         public Routes.Dir Direction { get; set; }
-        public List<Tuple<double,string>> Times { get; set; }
 
         public Tram(int tramId, double departureTime)
         {
@@ -29,16 +25,18 @@ namespace TramSimulator.States
             this.DepartureTime = departureTime;
             this.PersonsOnTram = new List<int>();
             this.Direction = Routes.Dir.ToCS;
-            this.Times = new List<Tuple<double,string>>();
-
         }
+
+        //Empty the tram given some empty percentage
         public List<int> EmptyTram(double emptyRate)
         {
-            var personsLeaving = PersonsOnTram.Where(x => Generate.uniform(0, 1) < emptyRate).ToList();
+            //Randomly choose passengers to leave the tram
+            var personsLeaving = PersonsOnTram.Where(x => Generate.Uniform(0, 1) < emptyRate).ToList();
             PersonsOnTram = PersonsOnTram.Except(personsLeaving).ToList();
 
             return personsLeaving;
         }
+
         public List<int> FillTram(Queue<int> waitingPersons, double fillRate)
         {
             var entered = new List<int>();
@@ -54,7 +52,6 @@ namespace TramSimulator.States
             }
 
             return entered;
-
         }
     }
 }

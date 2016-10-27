@@ -1,16 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-using TramSimulator.States;
+﻿using TramSimulator.States;
+using TramSimulator.Sim;
 
 namespace TramSimulator.Events
 {
     public class EnterTrack : Event
     {
-       // int _tramId;
         string _station;
 
         public EnterTrack(int tramId, string station, double startTime)
@@ -21,7 +15,7 @@ namespace TramSimulator.Events
             this.EType = EventType.Other;
         }
 
-        public override void execute(SimulationState simState)
+        public override void Execute(SimulationState simState)
         {
             var station = simState.Stations[_station];
             //If the tram can enter PR
@@ -51,15 +45,10 @@ namespace TramSimulator.Events
                 {
                     station.EnterTrackQueue.Dequeue();
                 }
-                Track cT = simState.Routes.GetTrack(_tramId);
-
-                Track t = simState.Routes.GetTrack(_tramId);
-                if(t.From != _station)
-                {
-                    Console.WriteLine();
-                }
+ 
                 eventQueue.AddEvent(new TramExpectedDeparture(_tramId, _station, StartTime));
 
+                //Create events for waiting trams
                 if(station.EnterTrackQueue.Count > 0)
                 {
                     var nextTramId = station.EnterTrackQueue.Dequeue();

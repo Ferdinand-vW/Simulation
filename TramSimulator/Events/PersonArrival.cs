@@ -1,10 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-using TramSimulator.States;
+﻿using TramSimulator.States;
+using TramSimulator.Sim;
 
 namespace TramSimulator.Events
 {
@@ -22,11 +17,11 @@ namespace TramSimulator.Events
             this._stationName = stationName;
             this.EType = EventType.Other;
         }
-        public override void execute(SimulationState simState)
+        public override void Execute(SimulationState simState)
         {
             Station station = simState.Stations[_stationName];
             var persons = simState.Persons;
-            simState.counter++;
+            //Create a person object and insert it into a queue
             if(_direction == Routes.Dir.ToCS)
             {
                 int pid = persons.Count;
@@ -34,6 +29,7 @@ namespace TramSimulator.Events
                 p.QueueLengthAtArrival = station.WaitingPersonsToCS.Count;
                 persons.Add(pid,p);
                 station.WaitingPersonsToCS.Enqueue(pid);
+                //Set maxqueue statistic
                 if (station.WaitingPersonsToCS.Count > station.MaxQueueLengthCS)
                 { station.MaxQueueLengthCS = station.WaitingPersonsToCS.Count; }
             }
@@ -48,12 +44,13 @@ namespace TramSimulator.Events
                 { station.MaxQueueLengthPR = station.WaitingPersonsToPR.Count; }
             }
 
-            if (!simState.Rates.nonZeroPercentage(StartTime, _stationName, _direction))
+            //Create the next personarrival event if it exists within the same block
+            if (!simState.Rates.NonZeroPercentage(StartTime, _stationName, _direction))
             {
                 double newTime = StartTime + simState.Rates.PersonArrivalRate(_stationName, _direction, StartTime);
                 simState.EventQueue.AddEvent(new PersonArrival(newTime, _stationName, _direction));
             }
-            else
+            else //Otherwise, create an event for the next 15 minute block
             {
                 double newTime = StartTime + ((15 * 60) - (StartTime % (15 * 60)));
                 simState.EventQueue.AddEvent(new ZeroPersonArrival(newTime, _stationName, _direction));

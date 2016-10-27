@@ -1,0 +1,12 @@
+;0;1
+CSMaxDelays;157.627;209.896
+PRMaxDelays;119.248;149.719
+CSAvgDelays;15.965;16.581
+PRAvgDelays;7.986;8.652
+PrcOverOneMinuteDelay;0.089;0.093
+MaxWaitTimes;874.895;1046.011
+AvgWaitTimes;165.639;171.308
+MaxTravelTimes;1837.938;1887.897
+AvgTravelTimes;718.976;741.864
+CSMaxQueueSizes;314;383
+PRMaxQueueSizes;517;607
